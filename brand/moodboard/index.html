@@ -1,0 +1,117 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Hanoi Picks — Mood Board</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Anton&family=Bodoni+Moda:wght@500;700&family=Inter:wght@400;600;800&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --black:#121212; --ink:#0c0c0e; --red:#BE2231; --red-deep:#8E1622;
+    --cream:#ECE7DC; --cream-dim:#b8b3a7; --gold:#E8B33A;
+  }
+  *{margin:0;padding:0;box-sizing:border-box}
+  body{
+    background:var(--ink); color:var(--cream);
+    font-family:'Inter',system-ui,sans-serif; line-height:1.5;
+    background-image:radial-gradient(var(--black) 1px, transparent 1px);
+    background-size:5px 5px;
+  }
+  .wrap{max-width:1180px;margin:0 auto;padding:48px 28px 96px}
+  .kicker{font-family:'Inter';font-weight:800;letter-spacing:.35em;font-size:12px;color:var(--red);text-transform:uppercase}
+  h1{font-family:'Anton';font-size:clamp(52px,9vw,120px);line-height:.92;letter-spacing:.01em;text-transform:uppercase;margin:6px 0 2px}
+  h1 .alt{color:var(--red)}
+  .sub{font-family:'Bodoni Moda',serif;font-style:italic;font-size:clamp(16px,2.4vw,24px);color:var(--cream-dim);max-width:640px;margin-top:10px}
+  .star{color:var(--cream);font-size:.7em;vertical-align:middle;margin:0 .15em}
+  .rule{height:2px;background:linear-gradient(90deg,var(--red),transparent);margin:34px 0}
+  h2{font-family:'Anton';font-size:30px;letter-spacing:.02em;text-transform:uppercase;margin-bottom:4px}
+  h2 .n{color:var(--red);margin-right:12px}
+  .lead{color:var(--cream-dim);max-width:720px;margin-bottom:22px;font-size:15px}
+  .grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(280px,1fr));gap:20px}
+  .card{background:#1b1b1e;border:1px solid #2a2a2e;border-radius:10px;overflow:hidden;transition:transform .15s,border-color .15s;cursor:pointer}
+  .card:hover{transform:translateY(-4px);border-color:var(--red)}
+  .card img{width:100%;display:block;aspect-ratio:4/5;object-fit:cover;background:#000}
+  .card .cap{padding:12px 14px}
+  .card .cap b{font-weight:800;font-size:14px}
+  .card .cap span{display:block;color:var(--cream-dim);font-size:12.5px;margin-top:3px}
+  .threads{display:grid;grid-template-columns:repeat(auto-fit,minmax(240px,1fr));gap:16px;margin-top:8px}
+  .thread{background:#16161a;border-left:3px solid var(--red);border-radius:6px;padding:16px 18px}
+  .thread b{font-weight:800;display:block;margin-bottom:5px;font-size:15px}
+  .thread p{color:var(--cream-dim);font-size:13.5px}
+  .palette{display:flex;flex-wrap:wrap;gap:14px;margin-top:8px}
+  .sw{flex:1;min-width:150px;border-radius:8px;overflow:hidden;border:1px solid #2a2a2e}
+  .sw .chip{height:90px}
+  .sw .meta{padding:10px 12px;background:#16161a}
+  .sw .meta b{font-weight:800;font-size:13px}
+  .sw .meta span{display:block;color:var(--cream-dim);font-size:11.5px;font-family:monospace;margin-top:2px}
+  .note{margin-top:40px;padding:18px 20px;border:1px dashed #39393f;border-radius:8px;color:var(--cream-dim);font-size:13px}
+  .lightbox{position:fixed;inset:0;background:rgba(8,8,10,.94);display:none;align-items:center;justify-content:center;padding:30px;z-index:50}
+  .lightbox.on{display:flex}
+  .lightbox img{max-width:92vw;max-height:92vh;border-radius:8px;box-shadow:0 0 0 1px var(--red)}
+  footer{margin-top:60px;text-align:center;color:#55555c;font-size:12px}
+</style>
+</head>
+<body>
+<div class="wrap">
+
+  <div class="kicker">Brand Direction · Working Board</div>
+  <h1>HAN<span class="alt">OI</span> PICKS<span class="star">✦</span></h1>
+  <div class="sub">Mood board — references you pulled, and the throughline I'm seeing. We react, we refine, we lock it.</div>
+
+  <div class="rule"></div>
+
+  <h2><span class="n">01</span>Your References</h2>
+  <p class="lead">The 3 looks you sent. Click any to enlarge.</p>
+  <div class="grid">
+    <div class="card" onclick="zoom('img/broken.png')">
+      <img src="img/broken.png" alt="Broken">
+      <div class="cap"><b>“BROKEN” editorial</b><span>Halftone texture · cream + black + red · elegant serif meets bold sans · sparkle stars</span></div>
+    </div>
+    <div class="card" onclick="zoom('img/dice.png')">
+      <img src="img/dice.png" alt="Dice poster">
+      <div class="cap"><b>“Rolling” dice poster</b><span>Black base · red accents · halftone dice · heavy condensed type · grunge</span></div>
+    </div>
+    <div class="card" onclick="zoom('img/gambler.png')">
+      <img src="img/gambler.png" alt="Gambler">
+      <div class="cap"><b>“GAMBLER” vintage</b><span>Americana tattoo style · red + black + cream · cards, chips, dice, 777</span></div>
+    </div>
+  </div>
+
+  <div class="rule"></div>
+
+  <h2><span class="n">02</span>The Throughline</h2>
+  <p class="lead">What all three share — this is the direction your eye is pulling toward, and it's <b>nothing like</b> the clean-minimal tech look of most picks servers. This is grittier, vintage-editorial, with attitude.</p>
+  <div class="threads">
+    <div class="thread"><b>🎨 Black · Red · Cream</b><p>Deep red is the constant in all three. Warm off-white instead of stark white. This breaks the all-black/green category norm hard.</p></div>
+    <div class="thread"><b>🌫 Halftone &amp; grunge</b><p>Dotted print texture, distressed edges, vintage-print feel. Gives it a hand-made, collectible, premium-zine look.</p></div>
+    <div class="thread"><b>🔠 Bold display type</b><p>Big condensed grotesque (Anton/Impact energy) + the occasional elegant serif. Loud but tasteful.</p></div>
+    <div class="thread"><b>✦ Star &amp; spark accents</b><p>Four-point sparkles and spiky stars recur — a natural emblem hook for “Hanoi.”</p></div>
+    <div class="thread"><b>🎲 Gambling iconography</b><p>Dice, cards, chips, 777 — on-theme for picks/betting without being cheesy casino.</p></div>
+  </div>
+
+  <div class="rule"></div>
+
+  <h2><span class="n">03</span>Working Palette</h2>
+  <p class="lead">Pulled straight from your references. Not locked — a starting point.</p>
+  <div class="palette">
+    <div class="sw"><div class="chip" style="background:#0c0c0e"></div><div class="meta"><b>Ink Black</b><span>#0C0C0E</span></div></div>
+    <div class="sw"><div class="chip" style="background:#BE2231"></div><div class="meta"><b>Blood Red</b><span>#BE2231</span></div></div>
+    <div class="sw"><div class="chip" style="background:#ECE7DC"></div><div class="meta"><b>Bone Cream</b><span>#ECE7DC</span></div></div>
+    <div class="sw"><div class="chip" style="background:#E8B33A"></div><div class="meta"><b>Gold (optional)</b><span>#E8B33A</span></div></div>
+  </div>
+
+  <div class="note">
+    🗒 This is a living board — send more references and they get added here. Next we brainstorm the logo one element at a time (shape → emblem → wordmark → color), and nothing gets locked without your approval. Temporary localhost — delete anytime.
+  </div>
+
+  <footer>Hanoi Picks · working mood board · localhost</footer>
+</div>
+
+<div class="lightbox" id="lb" onclick="this.classList.remove('on')"><img id="lbimg" src=""></div>
+<script>
+  function zoom(src){document.getElementById('lbimg').src=src;document.getElementById('lb').classList.add('on');}
+</script>
+</body>
+</html>

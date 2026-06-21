@@ -1,0 +1,19 @@
+# Secrets — never commit
+.env
+.env.*
+!.env.example
+
+# Dependencies / build
+node_modules/
+dist/
+discord-mcp/.venv/
+discord-mcp/__pycache__/
+
+# Local data
+*.db
+*.sqlite
+*.sqlite3
+.claude-uploads/
+
+# Logs
+*.log

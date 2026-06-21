@@ -1,0 +1,17 @@
+node_modules/
+.env
+.env.*
+*.db
+*.db-shm
+*.db-wal
+dist/
+build/
+.next/
+*.log
+.bot.lock
+.claude-uploads/
+**/.claude-uploads/
+__pycache__/
+.venv/
+venv/
+.DS_Store
