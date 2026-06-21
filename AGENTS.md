@@ -2,7 +2,7 @@
 
 ## What this is
 
-Hanoi Picks is a paid sports-picks Discord business. The Discord is the product: free members see public channels, paying members get Premium access, and the owner uses an AI Discord bot to manage the server.
+Hanoi Picks is a paid sports-picks Discord business. The Discord is the product: free members see public channels, paying members get Premium access, and MiniMax-powered bots help welcome, answer, and publish inside the server.
 
 ## How it is organized
 
@@ -12,7 +12,11 @@ Hanoi Picks is a paid sports-picks Discord business. The Discord is the product:
 
 ## Bot basics
 
-The bot is a Node 20+ TypeScript Discord bot. It connects Discord channels to Claude Code sessions, stores channel/session state in SQLite, and uses Discord buttons for approval when Claude wants to edit files or run commands.
+Planned production bots should use MiniMax, not Claude Code. The current codebase contains a Node 20+ TypeScript Discord controller from the earlier Claude setup, but the go-forward plan is MiniMax bots on Railway:
+
+- Front Desk — public welcome, FAQ, contact-us, gentle Premium nudges.
+- Megaphone — owner-commanded announcements, giveaways, branded posts.
+- Bouncer — Discord AutoMod plus a proven moderation bot, not custom AI.
 
 Required before running:
 

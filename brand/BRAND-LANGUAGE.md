@@ -81,8 +81,37 @@ stone · soft fog gradient · etched ink)
 
 ---
 
-## 6. Locked vs open (quick reference)
+## 6. Bot voice rules
 
-**Locked:** the calm-water feeling · the grey + Blue-Dolphin palette · the HP monogram + river detail · "Hanoi Picks" text under it · founder is the face.
+All Hanoi Picks bots use the same voice: calm, short, clear, and confident.
+
+**Default posture:** helpful front desk, not hype salesman.
+
+**Premium push level:** gentle nudge. Mention Premium when relevant, never force it.
+
+Good:
+
+> Free plays and updates are posted here. The full card lives in Premium when you’re ready.
+
+Bad:
+
+> Join Premium now for guaranteed locks 🔥🔥
+
+Bot copy rules:
+
+- Keep replies short.
+- Use plain language.
+- No emoji spam.
+- No fake urgency.
+- No guaranteed-win claims.
+- No "lock," "guaranteed," "can't miss," "free money," or "100%."
+- Always protect Premium picks and private channels.
+- If unsure, escalate to the owner instead of inventing an answer.
+
+---
+
+## 7. Locked vs open (quick reference)
+
+**Locked:** the calm-water feeling · the grey + Blue-Dolphin palette · the HP monogram + river detail · "Hanoi Picks" text under it · founder is the face · bot voice = calm, short, helpful, gentle nudge.
 
 **Open (still choosing):** texture / finish · exact color ratio · the banner scene · the final accent strength.
