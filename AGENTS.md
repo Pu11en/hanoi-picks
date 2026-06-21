@@ -7,10 +7,8 @@ Hanoi Picks is a paid sports-picks Discord business. The Discord is the product:
 ## How it is organized
 
 - `brand/` — brand direction, voice, colors, logo notes, and moodboard.
-- `business/` — plans for money, payments, premium access, and strategy.
 - `marketing/` — space for social posts, ads, campaigns, and public growth work.
 - `product/` — the source-of-truth Discord product/bot code, docs, scripts, and workspace notes.
-- `hanoi-picks-discord/` — secondary Claude Code Discord controller copy; do not treat it as the main product unless Drew explicitly says to revive it.
 
 ## Bot basics
 

@@ -5,9 +5,8 @@ Sports-gambling community brand. **The Discord is the product** — members pay 
 ## Where everything lives
 | Folder | What's in it |
 |--------|--------------|
-| `product/` | The Discord — bot, server, code. Start: `cd product && ./run.sh` |
+| `product/` | The Discord — bot, server, code |
 | `marketing/` | Social media, content, ads, campaigns |
 | `brand/` | Logo, moodboard, colors, brand rules |
-| `business/` | Strategy, money (Whop), legal, plans |
 
-One folder = the whole business.
+One folder = the whole product and brand.
