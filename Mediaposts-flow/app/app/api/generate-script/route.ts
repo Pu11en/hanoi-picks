@@ -1,12 +1,10 @@
-import Anthropic from "@anthropic-ai/sdk";
+import { spawn } from "child_process";
 import { NextRequest, NextResponse } from "next/server";
 
-const client = new Anthropic({ apiKey: process.env.ANTHROPIC_API_KEY });
+const SYSTEM = `You write short 9x16 sports-betting video scripts for Hanoi Picks. Videos run 28-33 seconds, voiceover-driven.
 
-const SYSTEM = `You write short 9x16 sports-betting video scripts for Hanoi Picks. The videos run 28-33 seconds, voiceover-driven.
-
-FORMULA (always follow this exactly):
-1. HOOK (1 bold line): pick one vibe:
+FORMULA (always follow exactly):
+1. HOOK (1 bold line), pick one vibe:
    - "This is the official [EVENT] mad parlay that is almost guaranteed to hit."
    - "Betting [SPORT/STAT] has been so free this year."
    - "The [EVENT] is the easiest way to triple your [SPORT] betting."
@@ -21,23 +19,32 @@ VOICE RULES:
 - No intro, no signoff, no hashtags. Hook → picks → done.
 - Output ONLY the script. No labels, no commentary.`;
 
+function runClaude(prompt: string): Promise<string> {
+  return new Promise((resolve, reject) => {
+    const proc = spawn("claude", ["-p", prompt], { env: process.env });
+    let out = "", err = "";
+    proc.stdout.on("data", (d) => { out += d.toString(); });
+    proc.stderr.on("data", (d) => { err += d.toString(); });
+    proc.on("close", (code) => {
+      if (code !== 0) reject(new Error(err || `claude exited ${code}`));
+      else resolve(out.trim());
+    });
+  });
+}
+
 export async function POST(req: NextRequest) {
   const { sport, hookVibe, legs, reviseNote, previousScript } = await req.json();
 
   const userMsg = previousScript
-    ? `Previous script:\n${previousScript}\n\nRevise it based on this note: ${reviseNote}`
+    ? `Previous script:\n${previousScript}\n\nRevise based on this note: ${reviseNote}`
     : `Sport/event: ${sport}
 Hook vibe: ${hookVibe}
 Legs:
-${legs.map((l: { player: string; stat: string; line: string; recentForm: string; matchupEdge?: string }, i: number) => `${i + 1}. Player: ${l.player} | Stat: ${l.stat} | Line: ${l.line} | Recent form: ${l.recentForm}${l.matchupEdge ? ` | Matchup edge: ${l.matchupEdge}` : ""}`).join("\n")}`;
+${legs.map((l: { player: string; stat: string; line: string; recentForm: string; matchupEdge?: string }, i: number) =>
+  `${i + 1}. Player: ${l.player} | Stat: ${l.stat} | Line: ${l.line} | Recent form: ${l.recentForm}${l.matchupEdge ? ` | Matchup edge: ${l.matchupEdge}` : ""}`
+).join("\n")}`;
 
-  const msg = await client.messages.create({
-    model: "claude-haiku-4-5-20251001",
-    max_tokens: 400,
-    system: SYSTEM,
-    messages: [{ role: "user", content: userMsg }],
-  });
-
-  const script = (msg.content[0] as { type: string; text: string }).text.trim();
+  const fullPrompt = `${SYSTEM}\n\n${userMsg}`;
+  const script = await runClaude(fullPrompt);
   return NextResponse.json({ script });
 }

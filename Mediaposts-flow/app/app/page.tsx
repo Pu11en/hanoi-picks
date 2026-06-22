@@ -31,6 +31,18 @@ export default function Home() {
   function addLeg() { if (legs.length < 3) setLegs(prev => [...prev, emptyLeg()]); }
   function removeLeg(i: number) { if (legs.length > 2) setLegs(prev => prev.filter((_, idx) => idx !== i)); }
 
+  function loadDemo() {
+    setSport("MLB");
+    setHookVibe(HOOK_VIBES[1]);
+    setLegs([
+      { player: "Drew Rasmussen", stat: "strikeouts", line: "5.5", recentForm: "averaging 6.4 Ks over his last 10 starts, cleared this in 8 of 10", matchupEdge: "" },
+      { player: "Freddie Freeman", stat: "total bases", line: "1.5", recentForm: "averaging 1.7 total bases over his last 10", matchupEdge: "hitting .300 with a .500 slug vs right-handed pitching" },
+      { player: "Gerrit Cole", stat: "strikeouts", line: "6.5", recentForm: "46 strikeouts over his last 10 appearances", matchupEdge: "" },
+    ]);
+    setScript("Betting MLB strikeouts have been so free this year. Starting off with Drew Rasmussen to go over 5.5 strikeouts — he's averaging 6.4 over his last 10 starts and has cleared this in 8 of those 10 games. This should be free. My second pick is Freddie Freeman to go over 1.5 total bases — he's averaging 1.7 over his last 10 and is hitting nearly .300 with a .500 slug against right-handed pitching. My last guy recorded 46 strikeouts over his last 10 appearances, so we're going to roll with Gerrit Cole to go over 6.5 strikeouts.");
+    setStep("script");
+  }
+
   async function generateScript(revise = false) {
     setLoading(true);
     try {
@@ -77,7 +89,8 @@ export default function Home() {
             Pick → Script → Voice → Video
           </p>
         </div>
-        <div style={{ display: "flex", gap: 8 }}>
+        <div style={{ display: "flex", gap: 8, alignItems: "center" }}>
+          <button className="btn-ghost" style={{ padding: "6px 14px", fontSize: 12, marginRight: 4 }} onClick={loadDemo}>⚡ Demo</button>
           {["form", "script", "voice"].map((s, i) => (
             <span key={s} style={{
               width: 28, height: 28, borderRadius: "50%", display: "flex", alignItems: "center",
