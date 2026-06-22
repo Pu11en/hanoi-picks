@@ -38,16 +38,6 @@
       "name": "social-media",
       "template": "social-media.md",
       "purpose": "Social follow and content posts"
-    },
-    "contact-us": {
-      "name": "contact-us",
-      "template": "contact-us.md",
-      "purpose": "Support prompts and proof-submission instructions"
-    },
-    "tickets": {
-      "name": "contact-us",
-      "template": "tickets.md",
-      "purpose": "Ticket doorway post for support issues"
     }
   }
 }

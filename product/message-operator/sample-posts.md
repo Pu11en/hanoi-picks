@@ -118,33 +118,3 @@ YouTube: https://www.youtube.com/@hanoipicks
 
 Follow there so you don’t miss the next drop.
 
----
-
-## contact-us
-
-Need help getting access?
-
-Drop your issue here and include what you’re trying to access.
-
-If it’s free Premium proof, include:
-• platform you signed up for
-• screenshot/proof
-• whether you’re in Free Chat or Premium
-
-The team will check it and get you set up.
-
----
-
-## tickets
-
-🎫 NEED HELP? OPEN A TICKET
-
-Use this channel for access issues, payment questions, and free Premium proof.
-
-Include:
-• what you’re trying to access
-• whether you’re in Free Chat or Premium
-• platform used if this is free Premium proof
-• screenshot/proof if needed
-
-The team will check it and get you sorted.

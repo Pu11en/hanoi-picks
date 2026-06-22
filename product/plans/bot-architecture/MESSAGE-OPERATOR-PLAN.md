@@ -10,7 +10,7 @@ not building it. All focus is the Message Operator.
 
 The Message Operator is the bot for official server posts. It writes and posts the
 official messages into specific channels: announcements, member announcements,
-join premium, free premium, premium wins, giveaways, social, contact-us, and tickets.
+join premium, free premium, premium wins, giveaways, and social.
 
 ## Core decision (locked)
 
@@ -21,7 +21,7 @@ join premium, free premium, premium wins, giveaways, social, contact-us, and tic
   finished message into the correct target channel.
 - **Templates: one instruction file per message type.** Each type (announcement,
   member-announcement, join-premium, free-premium, premium-wins, giveaway,
-  social, contact-us, tickets) gets its own template file telling the bot how to write
+  social) gets its own template file telling the bot how to write
   that kind of post. The owner just says what they want; the bot pulls the
   matching template and fills it in.
 - **Draft-first, never auto-post.** It drafts, shows the target channel, and
@@ -249,31 +249,19 @@ Example:
 >
 > Free plays, clips, results, and Premium updates drop there too.
 
-### tickets / contact-us
+## Support / tickets
 
-Purpose: support, proof review, and issue handoff.
+Support is **not** a Message Operator template.
 
-Use for:
+The live `contact-us` channel was renamed to **support** because that is clearer for members. This channel should be where users open issues, and admins handle them.
 
-- Payment help.
-- Proof submission help.
-- Access problems.
-- Confused users.
-- Opening private support tickets / threads.
+Recommended setup:
 
-Style:
-
-- Short.
-- Helpful.
-- Route to human when needed.
-
-Example:
-
-> 🎫 NEED HELP? OPEN A TICKET
->
-> Use this channel for access issues, payment questions, and free Premium proof.
->
-> Include what you’re trying to access, whether you’re in Free Chat or Premium, and screenshot/proof if needed.
+- Use a real ticket system for support issues.
+- Members click a button or use the support channel to open an issue.
+- Each issue becomes a private ticket/thread.
+- Admins handle access problems, proof checks, payment questions, and role issues there.
+- The Message Operator should not draft “ticket posts” as a normal content type.
 
 ## Safety rules
 

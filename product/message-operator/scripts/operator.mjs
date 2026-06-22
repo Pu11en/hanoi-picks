@@ -185,7 +185,6 @@ function withEnvChannelIds(map) {
     'premium-wins': 'PREMIUM_WINS_CHANNEL_ID',
     giveaways: 'GIVEAWAYS_CHANNEL_ID',
     'social-media': 'SOCIAL_MEDIA_CHANNEL_ID',
-    'contact-us': 'CONTACT_US_CHANNEL_ID',
   };
 
   for (const [type, envKey] of Object.entries(envKeys)) {

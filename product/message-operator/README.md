@@ -25,8 +25,8 @@ Build this first. Do not build the Front Desk member-answering bot yet.
 - premium-wins
 - giveaways
 - social-media
-- contact-us
-- tickets
+
+Support/tickets are not part of the Message Operator. The support channel is for users to open issues, and admins handle them.
 
 ## Private setup
 
