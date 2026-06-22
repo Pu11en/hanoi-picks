@@ -9,6 +9,7 @@ dist/
 build/
 .next/
 *.log
+product/message-operator/config/live-channels.json
 .bot.lock
 .claude-uploads/
 **/.claude-uploads/
