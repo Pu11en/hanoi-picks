@@ -15,7 +15,7 @@ Hanoi Picks is a paid sports-picks Discord business. The Discord is the product:
 Planned production bots should use MiniMax, not Claude Code. The current codebase contains a Node 20+ TypeScript Discord controller from the earlier Claude setup, but the go-forward plan is MiniMax bots on Railway:
 
 - Front Desk — public welcome, FAQ, contact-us, gentle Premium nudges.
-- Megaphone — owner-commanded announcements, giveaways, branded posts.
+- Message Operator — owner-commanded announcements, promos, wins, giveaways, and channel-specific official posts.
 - Bouncer — Discord AutoMod plus a proven moderation bot, not custom AI.
 
 Required before running:

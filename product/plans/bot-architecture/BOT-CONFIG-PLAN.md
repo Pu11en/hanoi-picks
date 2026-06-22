@@ -7,7 +7,7 @@ Hanoi Picks uses MiniMax for member-facing and server-facing bots. Claude Code i
 Recommended setup:
 
 1. **Front Desk** — automatic public-facing helper.
-2. **Megaphone** — owner-commanded publishing helper.
+2. **Message Operator** — owner-commanded publishing helper for announcements, promos, wins, giveaways, and channel-specific official posts.
 3. **Bouncer** — Discord AutoMod plus a proven moderation bot, not custom AI.
 
 This keeps each bot narrow. Narrow bots are safer, cheaper, easier to test, and less likely to hallucinate.
@@ -113,20 +113,23 @@ Bot:
 
 ---
 
-## Bot 2 — Megaphone
+## Bot 2 — Message Operator
 
 ### Job
 
-The Megaphone creates and posts polished server messages when the owner asks.
+The Message Operator creates and posts official server messages when the owner asks.
 
 It handles:
 
 - Public announcements.
 - Member announcements.
+- Join Premium posts.
+- Free Premium sportsbook promo posts.
 - Giveaway posts.
 - Result/proof posts.
 - Premium CTA posts.
-- Event or promo reminders.
+- Social-media posts.
+- Contact-us support prompts.
 
 ### Who can command it
 
@@ -134,7 +137,7 @@ Only approved owner/admin users.
 
 ### Safety rule
 
-The Megaphone should draft first and ask for approval before posting, unless the command explicitly says to post immediately.
+The Message Operator should draft first and ask for approval before posting, unless the command explicitly says to post immediately.
 
 Default flow:
 
@@ -216,7 +219,7 @@ Both bots must refuse or redirect when asked to:
 2. Test it with a second account.
 3. Add channel permissions.
 4. Add cost limits and kill switch.
-5. Add Megaphone.
+5. Add Message Operator.
 6. Test draft/approve/post flow.
 7. Turn on AutoMod and the moderation bot.
 
@@ -224,6 +227,6 @@ Both bots must refuse or redirect when asked to:
 
 ## Open decision
 
-Start with Front Desk only, then add Megaphone after the welcome/FAQ flow is working.
+Start with Front Desk only, then add Message Operator after the welcome/FAQ flow is working.
 
 Recommended default: **Front Desk first**.
