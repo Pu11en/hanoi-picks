@@ -1,5 +1,5 @@
 "use client";
-import { useState, useRef } from "react";
+import { useEffect, useState, useRef } from "react";
 
 const HOOK_VIBES = [
   "Auto-pick the best Hanoi hook",
@@ -18,6 +18,8 @@ Gerrit Cole over 6.5 strikeouts. 46 strikeouts over his last 10 appearances. End
 
 const DEMO_SCRIPT = "Betting MLB strikeouts have been so free this year. Starting off with Drew Rasmussen to go over 5.5 strikeouts — he's averaging 6.4 over his last 10 starts and has cleared this in 8 of those 10 games. This should be free. My second pick is Freddie Freeman to go over 1.5 total bases — he's averaging 1.7 over his last 10 and is hitting nearly .300 with a .500 slug against right-handed pitching. My last guy recorded 46 strikeouts over his last 10 appearances, so we're going to roll with Gerrit Cole to go over 6.5 strikeouts.";
 
+type VoiceOption = { voiceId: string; name: string; previewUrl?: string };
+
 export default function Home() {
   const [pickDump, setPickDump] = useState("");
   const [hookVibe, setHookVibe] = useState(HOOK_VIBES[0]);
@@ -25,6 +27,10 @@ export default function Home() {
   const [reviseNote, setReviseNote] = useState("");
   const [voiceUrl, setVoiceUrl] = useState("");
   const [voiceMode, setVoiceMode] = useState<"elevenlabs" | "upload">("elevenlabs");
+  const [voices, setVoices] = useState<VoiceOption[]>([]);
+  const [selectedVoiceId, setSelectedVoiceId] = useState("");
+  const [customVoiceId, setCustomVoiceId] = useState("");
+  const [voicesLoading, setVoicesLoading] = useState(false);
   const [step, setStep] = useState<"dump" | "script" | "voice">("dump");
   const [loading, setLoading] = useState(false);
   const [voiceLoading, setVoiceLoading] = useState(false);
@@ -38,6 +44,29 @@ export default function Home() {
     setError("");
     setStep("script");
   }
+
+  async function loadVoices() {
+    setVoicesLoading(true);
+    setError("");
+    try {
+      const res = await fetch("/api/voices");
+      const data = await res.json();
+      if (!res.ok) throw new Error(data.error || "Could not load voices");
+      setVoices(data.voices || []);
+      setSelectedVoiceId(current => current || data.defaultVoiceId || data.voices?.[0]?.voiceId || "");
+    } catch (err) {
+      setError(err instanceof Error ? err.message : "Could not load voices");
+    } finally {
+      setVoicesLoading(false);
+    }
+  }
+
+  useEffect(() => {
+    if (step === "voice" && voiceMode === "elevenlabs" && voices.length === 0 && !voicesLoading) {
+      // eslint-disable-next-line react-hooks/set-state-in-effect -- load voices once when the voice step opens
+      loadVoices();
+    }
+  }, [step, voiceMode, voices.length, voicesLoading]);
 
   async function generateScript(revise = false) {
     setLoading(true);
@@ -72,7 +101,7 @@ export default function Home() {
       const res = await fetch("/api/generate-voice", {
         method: "POST",
         headers: { "content-type": "application/json" },
-        body: JSON.stringify({ script }),
+        body: JSON.stringify({ script, voiceId: customVoiceId.trim() || selectedVoiceId }),
       });
       const data = await res.json();
       if (!res.ok) throw new Error(data.error || "Voice generation failed");
@@ -210,9 +239,39 @@ export default function Home() {
           </div>
 
           {voiceMode === "elevenlabs" ? (
-            <button className="btn-primary" onClick={generateVoice} disabled={voiceLoading || !script.trim()}>
-              {voiceLoading ? "Generating voice…" : "Generate voiceover"}
-            </button>
+            <div style={{ display: "flex", flexDirection: "column", gap: 12 }}>
+              <div style={{ display: "grid", gridTemplateColumns: "1fr auto", gap: 10, alignItems: "end" }}>
+                <div>
+                  <label>Choose ElevenLabs voice</label>
+                  <select value={selectedVoiceId} onChange={e => setSelectedVoiceId(e.target.value)} disabled={voicesLoading}>
+                    {!selectedVoiceId && <option value="">Select a voice</option>}
+                    {voices.map(v => (
+                      <option key={v.voiceId} value={v.voiceId}>{v.name} — {v.voiceId}</option>
+                    ))}
+                  </select>
+                </div>
+                <button className="btn-ghost" onClick={loadVoices} disabled={voicesLoading}>
+                  {voicesLoading ? "Loading…" : "Refresh voices"}
+                </button>
+              </div>
+
+              <div>
+                <label>Or paste a custom voice ID</label>
+                <input
+                  placeholder="Optional — overrides the dropdown"
+                  value={customVoiceId}
+                  onChange={e => setCustomVoiceId(e.target.value)}
+                />
+              </div>
+
+              {selectedVoiceId && !customVoiceId.trim() && (
+                <p style={{ color: "var(--muted)", fontSize: 12 }}>Using selected voice ID: {selectedVoiceId}</p>
+              )}
+
+              <button className="btn-primary" onClick={generateVoice} disabled={voiceLoading || !script.trim() || (!selectedVoiceId && !customVoiceId.trim())}>
+                {voiceLoading ? "Generating voice…" : "Generate voiceover"}
+              </button>
+            </div>
           ) : (
             <>
               <input ref={fileRef} type="file" accept="audio/mp3,audio/mpeg" style={{ display: "none" }} onChange={handleUpload} />
