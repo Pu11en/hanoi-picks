@@ -1,0 +1,48 @@
+{
+  "control": {
+    "name": "agent-control",
+    "purpose": "Owner/admin command channel. The Message Operator listens here only."
+  },
+  "targets": {
+    "announcements": {
+      "name": "announcements",
+      "template": "announcements.md",
+      "purpose": "Public server-wide updates"
+    },
+    "member-announcements": {
+      "name": "member-announcements",
+      "template": "member-announcements.md",
+      "purpose": "Premium-only member updates"
+    },
+    "join-premium": {
+      "name": "join-premium",
+      "template": "join-premium.md",
+      "purpose": "Main Premium sales offer"
+    },
+    "free-premium": {
+      "name": "free-premium",
+      "template": "free-premium.md",
+      "purpose": "Free Premium through sportsbook signup promos"
+    },
+    "premium-wins": {
+      "name": "premium-wins",
+      "template": "premium-wins.md",
+      "purpose": "Verified wins, results, screenshots, and proof"
+    },
+    "giveaways": {
+      "name": "giveaways",
+      "template": "giveaways.md",
+      "purpose": "Giveaways and promotional contests"
+    },
+    "social-media": {
+      "name": "social-media",
+      "template": "social-media.md",
+      "purpose": "Social follow and content posts"
+    },
+    "contact-us": {
+      "name": "contact-us",
+      "template": "contact-us.md",
+      "purpose": "Support prompts and proof-submission instructions"
+    }
+  }
+}
