@@ -20,6 +20,7 @@ const channelMapPath = resolve(messageOperatorDir, 'config', 'channel-map.json')
 const logsDir = resolve(messageOperatorDir, 'logs');
 const draftsPath = resolve(logsDir, 'drafts.jsonl');
 const postsPath = resolve(logsDir, 'posts.jsonl');
+const ticketsPath = resolve(logsDir, 'tickets.jsonl');
 
 loadLocalEnv();
 mkdirSync(logsDir, { recursive: true });
@@ -32,6 +33,7 @@ const config = {
   minimaxModel: process.env.MINIMAX_MODEL ?? 'MiniMax-M3',
   controlChannelName: process.env.CONTROL_CHANNEL_NAME ?? 'agent-control',
   controlChannelId: process.env.CONTROL_CHANNEL_ID,
+  supportChannelId: process.env.SUPPORT_CHANNEL_ID || process.env.CONTACT_US_CHANNEL_ID,
   requireApproval: process.env.REQUIRE_APPROVAL !== 'false',
   dryRun: process.env.DRY_RUN !== 'false',
 };
@@ -118,6 +120,12 @@ client.on(Events.MessageCreate, async (message) => {
 
 client.on(Events.InteractionCreate, async (interaction) => {
   if (!interaction.isButton()) return;
+
+  if (interaction.customId === 'support_open') {
+    await openSupportTicket(interaction);
+    return;
+  }
+
   if (!interaction.customId.startsWith('mo_')) return;
 
   const [action, draftId] = interaction.customId.replace('mo_', '').split(':');
@@ -214,6 +222,41 @@ async function resolveTargetChannel(guild, target) {
 
 function isTextLike(channel) {
   return channel.type === ChannelType.GuildText || channel.type === ChannelType.GuildAnnouncement;
+}
+
+async function openSupportTicket(interaction) {
+  const supportChannel = config.supportChannelId
+    ? await interaction.guild.channels.fetch(config.supportChannelId).catch(() => null)
+    : interaction.channel;
+
+  if (!supportChannel || !isTextLike(supportChannel)) {
+    await interaction.reply({ content: 'Support is not configured yet. Ask an admin to check the support channel.', ephemeral: true });
+    return;
+  }
+
+  const safeName = interaction.user.username.toLowerCase().replace(/[^a-z0-9-]/g, '-').replace(/-+/g, '-').slice(0, 24) || 'member';
+  const threadName = `ticket-${safeName}-${Date.now().toString().slice(-5)}`;
+
+  try {
+    const thread = await supportChannel.threads.create({
+      name: threadName,
+      type: ChannelType.PrivateThread,
+      invitable: false,
+      reason: `Support ticket opened by ${interaction.user.tag}`,
+    });
+
+    await thread.members.add(interaction.user.id);
+    await thread.send({
+      content: `<@${interaction.user.id}> thanks — an admin will help you here.\n\nPlease send:\n• what you’re trying to access\n• whether you’re in Free Chat or Premium\n• platform used if this is free Premium proof\n• screenshot/proof if needed`,
+      allowedMentions: { users: [interaction.user.id] },
+    });
+
+    logJson(ticketsPath, { threadId: thread.id, userId: interaction.user.id, userTag: interaction.user.tag, at: new Date().toISOString() });
+    await interaction.reply({ content: `Ticket opened: <#${thread.id}>`, ephemeral: true });
+  } catch (error) {
+    console.error(error);
+    await interaction.reply({ content: 'I could not open a private ticket. Ask an admin to check my thread permissions.', ephemeral: true });
+  }
 }
 
 async function createDraft({ type, goal, template, targetChannel }) {
