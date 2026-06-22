@@ -1,22 +1,26 @@
 # Hanoi Picks — Brand Language
 
-> The locked identity + the copy-paste prompts to make assets without drift.
-> This reflects the CURRENT direction (calm water). It replaces the old red/gold
-> "flag" palette in `product/docs/BRANDING.md` — that color idea is dropped; the
-> research in that file is still good.
+> Current brand direction based on the client’s live Discord copy.
+> The bot and marketing voice should follow the real server offer first.
 
 ---
 
-## 1. The feeling (LOCKED)
+## 1. The feeling
 
-Calm water, not loud noise. Intelligent and patient, not hype.
-**Ancient wisdom + modern execution.** It whispers — that restraint is what makes it premium.
+Hanoi Picks is a sports-betting Discord with a direct, confident, sales-forward voice.
 
-Most betting brands scream. Hanoi Picks is quiet, sure, and precise.
+The live offer is built around:
 
-Words that ARE the brand: calm · water · flow · patience · reflection · hidden information · precision · signal.
+- Winning with Hanoi’s Picks.
+- Daily slips and full data writeups.
+- Value picks every night.
+- A proven track record of monthly profit.
+- Expert team + proprietary AI scanners.
+- Free Premium through partner sportsbook signups.
 
-Words to avoid: loud, hype, lock, guaranteed, flex, lambo, screaming.
+Words that ARE the brand: winning · value picks · daily slips · data writeups · pro edge · AI scanners · bankroll · Premium · verified history · community.
+
+The bot should sound like the current Discord offer, not like a quiet luxury brand.
 
 ---
 
@@ -83,35 +87,25 @@ stone · soft fog gradient · etched ink)
 
 ## 6. Bot voice rules
 
-All Hanoi Picks bots use the same voice: calm, short, clear, and confident.
+The bot voice follows the client’s live Discord sales copy first.
 
-**Default posture:** helpful front desk, not hype salesman.
+**Current bot direction:** sales-forward, direct, sportsbook-native, and offer-focused.
 
-**Premium push level:** gentle nudge. Mention Premium when relevant, never force it.
+The bot should be able to explain:
 
-Good:
+- Premium membership.
+- Free Premium through partner sportsbook signups.
+- The code HANOI.
+- Sports covered.
+- Social links.
+- How to DM proof and get access.
 
-> Free plays and updates are posted here. The full card lives in Premium when you’re ready.
-
-Bad:
-
-> Join Premium now for guaranteed locks 🔥🔥
-
-Bot copy rules:
-
-- Keep replies short.
-- Use plain language.
-- No emoji spam.
-- No fake urgency.
-- No guaranteed-win claims.
-- No "lock," "guaranteed," "can't miss," "free money," or "100%."
-- Always protect Premium picks and private channels.
-- If unsure, escalate to the owner instead of inventing an answer.
+Bot copy can be punchy and use emojis when useful for scanning. It should not invent facts, leak Premium picks, bypass proof/payment steps, or claim access is active before it is confirmed.
 
 ---
 
 ## 7. Locked vs open (quick reference)
 
-**Locked:** the calm-water feeling · the grey + Blue-Dolphin palette · the HP monogram + river detail · "Hanoi Picks" text under it · founder is the face · bot voice = calm, short, helpful, gentle nudge.
+**Locked:** the grey + Blue-Dolphin palette · the HP monogram + river detail · "Hanoi Picks" text under it · founder is the face · bot voice follows the client’s live Discord sales copy.
 
 **Open (still choosing):** texture / finish · exact color ratio · the banner scene · the final accent strength.
