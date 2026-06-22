@@ -31,6 +31,7 @@ const config = {
   minimaxBaseUrl: process.env.MINIMAX_BASE_URL ?? 'https://api.minimax.io/v1',
   minimaxModel: process.env.MINIMAX_MODEL ?? 'MiniMax-M3',
   controlChannelName: process.env.CONTROL_CHANNEL_NAME ?? 'agent-control',
+  controlChannelId: process.env.CONTROL_CHANNEL_ID,
   requireApproval: process.env.REQUIRE_APPROVAL !== 'false',
   dryRun: process.env.DRY_RUN !== 'false',
 };
@@ -38,7 +39,7 @@ const config = {
 if (!config.discordToken) fail('Missing DISCORD_BOT_TOKEN in private settings.');
 if (!config.minimaxApiKey) fail('Missing MINIMAX_API_KEY in private settings.');
 
-const channelMap = JSON.parse(readFileSync(channelMapPath, 'utf8'));
+const channelMap = withEnvChannelIds(JSON.parse(readFileSync(channelMapPath, 'utf8')));
 const pendingDrafts = new Map();
 
 const client = new Client({
@@ -53,7 +54,7 @@ client.once(Events.ClientReady, async () => {
 
   const guild = await client.guilds.fetch(guildId);
   const channels = await guild.channels.fetch();
-  const controlChannel = findChannel(channels, config.controlChannelName);
+  const controlChannel = findConfiguredChannel(channels, { id: config.controlChannelId, name: config.controlChannelName });
   if (!controlChannel) fail(`Could not find control channel: ${config.controlChannelName}`);
 
   console.log(`Message Operator online in ${guild.name}. Listening in #${controlChannel.name}.`);
@@ -62,7 +63,7 @@ client.once(Events.ClientReady, async () => {
 
 client.on(Events.MessageCreate, async (message) => {
   if (message.author.bot || !message.guild) return;
-  if (message.channel.name !== config.controlChannelName) return;
+  if (config.controlChannelId ? message.channel.id !== config.controlChannelId : message.channel.name !== config.controlChannelName) return;
 
   const text = message.content.trim();
   if (!text) return;
@@ -140,7 +141,7 @@ client.on(Events.InteractionCreate, async (interaction) => {
       return;
     }
 
-    const targetChannel = await resolveTargetChannel(interaction.guild, draft.target.name);
+    const targetChannel = await resolveTargetChannel(interaction.guild, draft.target);
     if (!targetChannel) {
       await interaction.reply({ content: `Could not find target channel #${draft.target.name}.`, ephemeral: true });
       return;
@@ -175,13 +176,41 @@ function readTemplate(filename) {
   return readFileSync(resolve(messageOperatorDir, 'templates', filename), 'utf8');
 }
 
+function withEnvChannelIds(map) {
+  const envKeys = {
+    announcements: 'ANNOUNCEMENTS_CHANNEL_ID',
+    'member-announcements': 'MEMBER_ANNOUNCEMENTS_CHANNEL_ID',
+    'join-premium': 'JOIN_PREMIUM_CHANNEL_ID',
+    'free-premium': 'FREE_PREMIUM_CHANNEL_ID',
+    'premium-wins': 'PREMIUM_WINS_CHANNEL_ID',
+    giveaways: 'GIVEAWAYS_CHANNEL_ID',
+    'social-media': 'SOCIAL_MEDIA_CHANNEL_ID',
+    'contact-us': 'CONTACT_US_CHANNEL_ID',
+  };
+
+  for (const [type, envKey] of Object.entries(envKeys)) {
+    if (map.targets[type] && process.env[envKey]) {
+      map.targets[type].id = process.env[envKey];
+    }
+  }
+  return map;
+}
+
 function findChannel(channels, name) {
   return [...channels.values()].find((channel) => channel?.name === name && isTextLike(channel));
 }
 
-async function resolveTargetChannel(guild, name) {
-  const channels = await guild.channels.fetch();
+function findConfiguredChannel(channels, { id, name }) {
+  if (id) {
+    const channel = channels.get(id);
+    if (channel && isTextLike(channel)) return channel;
+  }
   return findChannel(channels, name);
+}
+
+async function resolveTargetChannel(guild, target) {
+  const channels = await guild.channels.fetch();
+  return findConfiguredChannel(channels, target);
 }
 
 function isTextLike(channel) {

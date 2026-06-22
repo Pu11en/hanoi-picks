@@ -11,7 +11,8 @@
     "test": "vitest run",
     "test:watch": "vitest",
     "message-operator:channels": "node message-operator/scripts/list-channels.mjs",
-    "message-operator:start": "node message-operator/scripts/operator.mjs"
+    "message-operator:start": "node message-operator/scripts/operator.mjs",
+    "message-operator:post-samples": "node message-operator/scripts/post-samples.mjs"
   },
   "dependencies": {
     "@anthropic-ai/claude-agent-sdk": "^0.2.86",
