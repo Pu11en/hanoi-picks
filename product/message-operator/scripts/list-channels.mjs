@@ -19,10 +19,10 @@ if (existsSync(envPath)) {
 }
 
 const token = process.env.DISCORD_BOT_TOKEN;
-const guildId = process.env.DISCORD_GUILD_ID;
+let guildId = process.env.DISCORD_GUILD_ID;
 
-if (!token || !guildId) {
-  console.error('Missing private Discord settings. Fill product/message-operator/.env first.');
+if (!token) {
+  console.error('Missing private Discord bot setting. Fill product/message-operator/.env first.');
   process.exit(1);
 }
 
@@ -41,6 +41,15 @@ const typeLabel = new Map([
 
 client.once('ready', async () => {
   try {
+    if (!guildId) {
+      const guilds = await client.guilds.fetch();
+      if (guilds.size !== 1) {
+        console.error('Set DISCORD_GUILD_ID in private settings. Bot is in more than one server or none.');
+        process.exit(1);
+      }
+      guildId = guilds.first().id;
+    }
+
     const guild = await client.guilds.fetch(guildId);
     const channels = await guild.channels.fetch();
 

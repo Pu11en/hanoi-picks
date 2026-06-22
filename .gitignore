@@ -10,6 +10,7 @@ build/
 .next/
 *.log
 product/message-operator/config/live-channels.json
+product/message-operator/logs/
 .bot.lock
 .claude-uploads/
 **/.claude-uploads/
