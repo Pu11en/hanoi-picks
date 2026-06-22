@@ -13,7 +13,8 @@
     "message-operator:channels": "node message-operator/scripts/list-channels.mjs",
     "message-operator:start": "node message-operator/scripts/operator.mjs",
     "message-operator:post-samples": "node message-operator/scripts/post-samples.mjs",
-    "message-operator:post-ticket-panel": "node message-operator/scripts/post-ticket-panel.mjs"
+    "message-operator:post-ticket-panel": "node message-operator/scripts/post-ticket-panel.mjs",
+    "message-operator:audit-permissions": "node message-operator/scripts/audit-permissions.mjs"
   },
   "dependencies": {
     "@anthropic-ai/claude-agent-sdk": "^0.2.86",
