@@ -29,11 +29,17 @@ function runClaude(prompt: string): Promise<string> {
 
     let out = "";
     let err = "";
+    // ponytail: 120s ceiling — Claude session limit or a hung CLI should fail fast, not hang the request
+    const timer = setTimeout(() => {
+      proc.kill("SIGKILL");
+      reject(new Error("Claude took too long (over 2 minutes). It may be at its session limit — try again later."));
+    }, 120000);
 
     proc.stdout.on("data", (d) => { out += d.toString(); });
     proc.stderr.on("data", (d) => { err += d.toString(); });
-    proc.on("error", reject);
+    proc.on("error", (e) => { clearTimeout(timer); reject(e); });
     proc.on("close", (code) => {
+      clearTimeout(timer);
       if (code !== 0) reject(new Error((err || out || `claude exited ${code}`).trim()));
       else resolve(out.trim());
     });
