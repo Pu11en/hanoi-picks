@@ -10,7 +10,7 @@ not building it. All focus is the Message Operator.
 
 The Message Operator is the bot for official server posts. It writes and posts the
 official messages into specific channels: announcements, member announcements,
-join premium, free premium, premium wins, giveaways, social, and contact-us.
+join premium, free premium, premium wins, giveaways, social, contact-us, and tickets.
 
 ## Core decision (locked)
 
@@ -21,7 +21,7 @@ join premium, free premium, premium wins, giveaways, social, and contact-us.
   finished message into the correct target channel.
 - **Templates: one instruction file per message type.** Each type (announcement,
   member-announcement, join-premium, free-premium, premium-wins, giveaway,
-  social, contact-us) gets its own template file telling the bot how to write
+  social, contact-us, tickets) gets its own template file telling the bot how to write
   that kind of post. The owner just says what they want; the bot pulls the
   matching template and fills it in.
 - **Draft-first, never auto-post.** It drafts, shows the target channel, and
@@ -249,9 +249,9 @@ Example:
 >
 > Free plays, clips, results, and Premium updates drop there too.
 
-### contact-us
+### tickets / contact-us
 
-Purpose: support and handoff.
+Purpose: support, proof review, and issue handoff.
 
 Use for:
 
@@ -259,6 +259,7 @@ Use for:
 - Proof submission help.
 - Access problems.
 - Confused users.
+- Opening private support tickets / threads.
 
 Style:
 
@@ -268,9 +269,11 @@ Style:
 
 Example:
 
-> Drop your issue here and include what you’re trying to access.
+> 🎫 NEED HELP? OPEN A TICKET
 >
-> If it’s free Premium proof, include the platform you signed up for and say whether you’re in Free Chat or Premium.
+> Use this channel for access issues, payment questions, and free Premium proof.
+>
+> Include what you’re trying to access, whether you’re in Free Chat or Premium, and screenshot/proof if needed.
 
 ## Safety rules
 

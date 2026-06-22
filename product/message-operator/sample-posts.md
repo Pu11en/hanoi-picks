@@ -132,3 +132,19 @@ If it’s free Premium proof, include:
 • whether you’re in Free Chat or Premium
 
 The team will check it and get you set up.
+
+---
+
+## tickets
+
+🎫 NEED HELP? OPEN A TICKET
+
+Use this channel for access issues, payment questions, and free Premium proof.
+
+Include:
+• what you’re trying to access
+• whether you’re in Free Chat or Premium
+• platform used if this is free Premium proof
+• screenshot/proof if needed
+
+The team will check it and get you sorted.

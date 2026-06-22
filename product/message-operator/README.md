@@ -26,6 +26,7 @@ Build this first. Do not build the Front Desk member-answering bot yet.
 - giveaways
 - social-media
 - contact-us
+- tickets
 
 ## Private setup
 
