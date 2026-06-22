@@ -2,64 +2,72 @@
 import { useState, useRef } from "react";
 
 const HOOK_VIBES = [
-  "Official [EVENT] mad parlay — almost guaranteed to hit",
-  "Betting [SPORT/STAT] has been so free this year",
-  "The [EVENT] is the easiest way to triple your betting",
+  "Auto-pick the best Hanoi hook",
+  "Official mad parlay — almost guaranteed",
+  "Betting this market has been free",
+  "Easiest way to triple the bet",
 ];
 
-type Leg = { player: string; stat: string; line: string; recentForm: string; matchupEdge: string };
+const DEMO_NOTES = `MLB parlay for tonight. Make it sound like Hanoi Picks, fast and cocky.
 
-const emptyLeg = (): Leg => ({ player: "", stat: "", line: "", recentForm: "", matchupEdge: "" });
+Drew Rasmussen over 5.5 strikeouts. He's averaging 6.4 Ks over his last 10 starts and cleared this in 8 of 10.
+
+Freddie Freeman over 1.5 total bases. Averaging 1.7 total bases over his last 10. Hitting around .300 with a .500 slug against righties.
+
+Gerrit Cole over 6.5 strikeouts. 46 strikeouts over his last 10 appearances. End by rolling with Cole.`;
+
+const DEMO_SCRIPT = "Betting MLB strikeouts have been so free this year. Starting off with Drew Rasmussen to go over 5.5 strikeouts — he's averaging 6.4 over his last 10 starts and has cleared this in 8 of those 10 games. This should be free. My second pick is Freddie Freeman to go over 1.5 total bases — he's averaging 1.7 over his last 10 and is hitting nearly .300 with a .500 slug against right-handed pitching. My last guy recorded 46 strikeouts over his last 10 appearances, so we're going to roll with Gerrit Cole to go over 6.5 strikeouts.";
 
 export default function Home() {
-  const [sport, setSport] = useState("");
+  const [pickDump, setPickDump] = useState("");
   const [hookVibe, setHookVibe] = useState(HOOK_VIBES[0]);
-  const [legs, setLegs] = useState<Leg[]>([emptyLeg(), emptyLeg()]);
   const [script, setScript] = useState("");
   const [reviseNote, setReviseNote] = useState("");
   const [voiceUrl, setVoiceUrl] = useState("");
   const [voiceMode, setVoiceMode] = useState<"elevenlabs" | "upload">("elevenlabs");
-  const [step, setStep] = useState<"form" | "script" | "voice">("form");
+  const [step, setStep] = useState<"dump" | "script" | "voice">("dump");
   const [loading, setLoading] = useState(false);
   const [voiceLoading, setVoiceLoading] = useState(false);
+  const [error, setError] = useState("");
   const fileRef = useRef<HTMLInputElement>(null);
 
-  function updateLeg(i: number, field: keyof Leg, val: string) {
-    setLegs(prev => prev.map((l, idx) => idx === i ? { ...l, [field]: val } : l));
-  }
-
-  function addLeg() { if (legs.length < 3) setLegs(prev => [...prev, emptyLeg()]); }
-  function removeLeg(i: number) { if (legs.length > 2) setLegs(prev => prev.filter((_, idx) => idx !== i)); }
-
   function loadDemo() {
-    setSport("MLB");
-    setHookVibe(HOOK_VIBES[1]);
-    setLegs([
-      { player: "Drew Rasmussen", stat: "strikeouts", line: "5.5", recentForm: "averaging 6.4 Ks over his last 10 starts, cleared this in 8 of 10", matchupEdge: "" },
-      { player: "Freddie Freeman", stat: "total bases", line: "1.5", recentForm: "averaging 1.7 total bases over his last 10", matchupEdge: "hitting .300 with a .500 slug vs right-handed pitching" },
-      { player: "Gerrit Cole", stat: "strikeouts", line: "6.5", recentForm: "46 strikeouts over his last 10 appearances", matchupEdge: "" },
-    ]);
-    setScript("Betting MLB strikeouts have been so free this year. Starting off with Drew Rasmussen to go over 5.5 strikeouts — he's averaging 6.4 over his last 10 starts and has cleared this in 8 of those 10 games. This should be free. My second pick is Freddie Freeman to go over 1.5 total bases — he's averaging 1.7 over his last 10 and is hitting nearly .300 with a .500 slug against right-handed pitching. My last guy recorded 46 strikeouts over his last 10 appearances, so we're going to roll with Gerrit Cole to go over 6.5 strikeouts.");
+    setPickDump(DEMO_NOTES);
+    setHookVibe(HOOK_VIBES[0]);
+    setScript(DEMO_SCRIPT);
+    setError("");
     setStep("script");
   }
 
   async function generateScript(revise = false) {
     setLoading(true);
+    setError("");
     try {
       const res = await fetch("/api/generate-script", {
         method: "POST",
         headers: { "content-type": "application/json" },
-        body: JSON.stringify({ sport, hookVibe, legs, reviseNote: revise ? reviseNote : undefined, previousScript: revise ? script : undefined }),
+        body: JSON.stringify({
+          pickDump,
+          hookVibe,
+          reviseNote: revise ? reviseNote : undefined,
+          previousScript: revise ? script : undefined,
+        }),
       });
       const data = await res.json();
+      if (!res.ok) throw new Error(data.error || "Script generation failed");
       setScript(data.script);
       setReviseNote("");
       setStep("script");
-    } finally { setLoading(false); }
+    } catch (err) {
+      setError(err instanceof Error ? err.message : "Something went wrong");
+    } finally {
+      setLoading(false);
+    }
   }
 
   async function generateVoice() {
     setVoiceLoading(true);
+    setError("");
     try {
       const res = await fetch("/api/generate-voice", {
         method: "POST",
@@ -67,18 +75,24 @@ export default function Home() {
         body: JSON.stringify({ script }),
       });
       const data = await res.json();
+      if (!res.ok) throw new Error(data.error || "Voice generation failed");
       setVoiceUrl(data.url);
       setStep("voice");
-    } finally { setVoiceLoading(false); }
+    } catch (err) {
+      setError(err instanceof Error ? err.message : "Something went wrong");
+    } finally {
+      setVoiceLoading(false);
+    }
   }
 
-  async function handleUpload(e: React.ChangeEvent<HTMLInputElement>) {
+  function handleUpload(e: React.ChangeEvent<HTMLInputElement>) {
     const file = e.target.files?.[0];
     if (!file) return;
-    const url = URL.createObjectURL(file);
-    setVoiceUrl(url);
+    setVoiceUrl(URL.createObjectURL(file));
     setStep("voice");
   }
+
+  const stepIndex = ["dump", "script", "voice"].indexOf(step);
 
   return (
     <main>
@@ -86,109 +100,98 @@ export default function Home() {
         <div>
           <h1 style={{ fontSize: 24, fontWeight: 800, letterSpacing: "-0.03em" }}>New Pick Video</h1>
           <p style={{ color: "var(--muted)", fontSize: 13, marginTop: 4 }}>
-            Pick → Script → Voice → Video
+            Dump notes → Claude script → Voiceover
           </p>
         </div>
         <div style={{ display: "flex", gap: 8, alignItems: "center" }}>
-          <button className="btn-ghost" style={{ padding: "6px 14px", fontSize: 12, marginRight: 4 }} onClick={loadDemo}>⚡ Demo</button>
-          {["form", "script", "voice"].map((s, i) => (
+          <button className="btn-ghost" style={{ padding: "6px 14px", fontSize: 12, marginRight: 4 }} onClick={loadDemo}>
+            ⚡ Demo
+          </button>
+          {["dump", "script", "voice"].map((s, i) => (
             <span key={s} style={{
-              width: 28, height: 28, borderRadius: "50%", display: "flex", alignItems: "center",
-              justifyContent: "center", fontSize: 12, fontWeight: 700,
-              background: step === s ? "var(--accent)" : (["form","script","voice"].indexOf(step) > i ? "#2a2a3a" : "var(--surface)"),
-              color: step === s ? "#fff" : (["form","script","voice"].indexOf(step) > i ? "var(--text)" : "var(--muted)"),
-              border: "1px solid var(--border)"
+              width: 28,
+              height: 28,
+              borderRadius: "50%",
+              display: "flex",
+              alignItems: "center",
+              justifyContent: "center",
+              fontSize: 12,
+              fontWeight: 700,
+              background: step === s ? "var(--accent)" : (stepIndex > i ? "#2a2a3a" : "var(--surface)"),
+              color: step === s ? "#fff" : (stepIndex > i ? "var(--text)" : "var(--muted)"),
+              border: "1px solid var(--border)",
             }}>{i + 1}</span>
           ))}
         </div>
       </div>
 
-      {/* STEP 1: PICK FORM */}
-      <div className="card" style={{ marginBottom: 16, display: step === "form" || true ? "block" : "none" }}>
+      {error && (
+        <div className="card" style={{ marginBottom: 16, borderColor: "#7f1d1d", background: "#1a0f12", color: "#fecaca" }}>
+          {error}
+        </div>
+      )}
+
+      <div className="card" style={{ marginBottom: 16 }}>
         <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", marginBottom: 18 }}>
-          <span style={{ fontWeight: 700, fontSize: 15 }}>The Pick</span>
+          <span style={{ fontWeight: 700, fontSize: 15 }}>Drop the Pick</span>
           <span className="tag">Step 1</span>
         </div>
 
-        <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 14, marginBottom: 14 }}>
+        <div style={{ marginBottom: 14 }}>
+          <label>Paste messy notes</label>
+          <textarea
+            rows={12}
+            placeholder={`Paste anything here. Example:\n\nMLB parlay tonight\nPlayer A over 5.5 Ks, cleared 8 of last 10\nPlayer B over 1.5 total bases, great vs righties\nMake it aggressive, 30 seconds, Hanoi Picks style`}
+            value={pickDump}
+            onChange={e => setPickDump(e.target.value)}
+            style={{ fontSize: 15, lineHeight: 1.7, minHeight: 260 }}
+          />
+        </div>
+
+        <div style={{ display: "grid", gridTemplateColumns: "1fr auto", gap: 12, alignItems: "end" }}>
           <div>
-            <label>Sport / Event</label>
-            <input placeholder="e.g. MLB, World Cup, NBA" value={sport} onChange={e => setSport(e.target.value)} />
-          </div>
-          <div>
-            <label>Hook vibe</label>
+            <label>Hook direction</label>
             <select value={hookVibe} onChange={e => setHookVibe(e.target.value)}>
               {HOOK_VIBES.map(v => <option key={v}>{v}</option>)}
             </select>
           </div>
-        </div>
-
-        <div style={{ display: "flex", flexDirection: "column", gap: 12 }}>
-          {legs.map((leg, i) => (
-            <div key={i} style={{ background: "#0f0f16", border: "1px solid var(--border)", borderRadius: 10, padding: 14 }}>
-              <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", marginBottom: 12 }}>
-                <span style={{ fontSize: 12, fontWeight: 700, color: "var(--accent)", textTransform: "uppercase", letterSpacing: "0.05em" }}>
-                  {i === 0 ? "Leg 1 — Starting off" : i === 1 ? "Leg 2 — Second pick" : "Closer — Roll with"}
-                </span>
-                {legs.length > 2 && (
-                  <button className="btn-ghost" style={{ padding: "3px 10px", fontSize: 12 }} onClick={() => removeLeg(i)}>✕</button>
-                )}
-              </div>
-              <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr 1fr", gap: 10, marginBottom: 10 }}>
-                <div><label>Player</label><input placeholder="e.g. Garrett Cole" value={leg.player} onChange={e => updateLeg(i, "player", e.target.value)} /></div>
-                <div><label>Stat</label><input placeholder="e.g. strikeouts, shots on target" value={leg.stat} onChange={e => updateLeg(i, "stat", e.target.value)} /></div>
-                <div><label>Line (over)</label><input placeholder="e.g. 5.5, 0.5, 1.5" value={leg.line} onChange={e => updateLeg(i, "line", e.target.value)} /></div>
-              </div>
-              <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 10 }}>
-                <div><label>Recent form</label><input placeholder="e.g. cleared this in 8 of last 10" value={leg.recentForm} onChange={e => updateLeg(i, "recentForm", e.target.value)} /></div>
-                <div><label>Matchup edge (optional)</label><input placeholder="e.g. faces team ranked 24th in strikeouts allowed" value={leg.matchupEdge} onChange={e => updateLeg(i, "matchupEdge", e.target.value)} /></div>
-              </div>
-            </div>
-          ))}
-        </div>
-
-        <div style={{ display: "flex", gap: 10, marginTop: 14 }}>
-          {legs.length < 3 && (
-            <button className="btn-ghost" onClick={addLeg}>+ Add 3rd leg</button>
-          )}
-          <button className="btn-primary" style={{ marginLeft: "auto" }} onClick={() => generateScript(false)} disabled={loading || !sport || legs.some(l => !l.player)}>
-            {loading ? "Generating…" : "Generate Script →"}
+          <button className="btn-primary" onClick={() => generateScript(false)} disabled={loading || !pickDump.trim()}>
+            {loading ? "Claude is writing…" : "Generate Script →"}
           </button>
         </div>
       </div>
 
-      {/* STEP 2: SCRIPT */}
-      {step !== "form" && (
+      {step !== "dump" && (
         <div className="card" style={{ marginBottom: 16 }}>
           <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", marginBottom: 18 }}>
             <span style={{ fontWeight: 700, fontSize: 15 }}>Script</span>
-            <div style={{ display: "flex", gap: 8, alignItems: "center" }}>
-              <span className="tag">Step 2</span>
-              <button className="btn-ghost" style={{ padding: "5px 12px", fontSize: 12 }} onClick={() => setStep("form")}>← Edit pick</button>
-            </div>
+            <span className="tag">Step 2</span>
           </div>
           <textarea
-            rows={6}
+            rows={7}
             value={script}
             onChange={e => setScript(e.target.value)}
             style={{ marginBottom: 14, fontFamily: "system-ui", fontSize: 15, lineHeight: 1.7 }}
           />
           <div style={{ display: "flex", gap: 10, alignItems: "flex-end" }}>
             <div style={{ flex: 1 }}>
-              <label>Revise note (optional)</label>
-              <input placeholder="e.g. make the hook more aggressive" value={reviseNote} onChange={e => setReviseNote(e.target.value)} />
+              <label>Chat with Claude to revise</label>
+              <input
+                placeholder="e.g. make it shorter, cockier, less formal"
+                value={reviseNote}
+                onChange={e => setReviseNote(e.target.value)}
+              />
             </div>
-            <button className="btn-ghost" onClick={() => generateScript(true)} disabled={loading}>
+            <button className="btn-ghost" onClick={() => generateScript(true)} disabled={loading || !reviseNote.trim()}>
               {loading ? "Revising…" : "Revise"}
             </button>
-            <button className="btn-primary" onClick={() => setStep("voice")}>
+            <button className="btn-primary" onClick={() => setStep("voice")} disabled={!script.trim()}>
               Lock Script →
             </button>
           </div>
         </div>
       )}
 
-      {/* STEP 3: VOICE */}
       {step === "voice" && (
         <div className="card">
           <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", marginBottom: 18 }}>
@@ -207,7 +210,7 @@ export default function Home() {
           </div>
 
           {voiceMode === "elevenlabs" ? (
-            <button className="btn-primary" onClick={generateVoice} disabled={voiceLoading}>
+            <button className="btn-primary" onClick={generateVoice} disabled={voiceLoading || !script.trim()}>
               {voiceLoading ? "Generating voice…" : "Generate voiceover"}
             </button>
           ) : (
@@ -223,7 +226,7 @@ export default function Home() {
               <audio controls src={voiceUrl} style={{ width: "100%", marginTop: 8, borderRadius: 8 }} />
               <div style={{ marginTop: 14 }}>
                 <button className="btn-primary" disabled style={{ opacity: 0.5 }}>
-                  Next: Find clips → (coming soon)
+                  Next: Find clips → coming next
                 </button>
               </div>
             </div>

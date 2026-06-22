@@ -3,48 +3,58 @@ import { NextRequest, NextResponse } from "next/server";
 
 const SYSTEM = `You write short 9x16 sports-betting video scripts for Hanoi Picks. Videos run 28-33 seconds, voiceover-driven.
 
-FORMULA (always follow exactly):
-1. HOOK (1 bold line), pick one vibe:
-   - "This is the official [EVENT] mad parlay that is almost guaranteed to hit."
-   - "Betting [SPORT/STAT] has been so free this year."
-   - "The [EVENT] is the easiest way to triple your [SPORT] betting."
-2. LEG 1 — "Starting off with [PLAYER] to go over [LINE] [STAT]. He's [averaged X / cleared this in N of his last 10 games]."
-3. LEG 2 — "My second pick is [PLAYER] to go over [LINE] [STAT]. He's averaging [X] over his last 10 and [matchup edge if provided]."
-4. CLOSER — "My last guy [recent stat], so we're going to roll with [PLAYER] to go over [LINE] [STAT]."
+The user may paste messy notes, screenshots converted to text, odds, player props, stat blurbs, partial ideas, or a rough draft. Extract the best 2-3 legs and turn them into one tight voiceover script.
+
+FORMULA:
+1. Bold/cocky hook.
+2. 2-3 parlay legs.
+3. Each leg includes player, line/stat, recent-form proof, and matchup edge if useful.
+4. End with: "so we're going to roll with..."
 
 VOICE RULES:
-- First person, confident, fast. "We're going to roll with…"
-- Sprinkle: "This should be free." / "almost guaranteed" / "only needs one to catch this line."
-- Lines are always half-points (0.5, 1.5, 5.5)
-- No intro, no signoff, no hashtags. Hook → picks → done.
+- First person, confident, fast. "We're going to roll with..."
+- Sound like Hanoi Picks, not a formal betting article.
+- Use punchy phrases like "This should be free," "almost guaranteed," or "only needs one to catch this line" when they fit.
+- Keep it around 28-33 seconds read aloud.
+- No intro, no signoff, no hashtags.
+- Do not invent hard stats unless the user gave them. If notes are missing a stat, use softer language like "he's been clearing this lately" rather than fake numbers.
 - Output ONLY the script. No labels, no commentary.`;
 
 function runClaude(prompt: string): Promise<string> {
   return new Promise((resolve, reject) => {
-    const proc = spawn("claude", ["-p", prompt], { env: process.env });
-    let out = "", err = "";
+    const proc = spawn("claude", ["-p"], {
+      env: process.env,
+      stdio: ["pipe", "pipe", "pipe"],
+    });
+
+    let out = "";
+    let err = "";
+
     proc.stdout.on("data", (d) => { out += d.toString(); });
     proc.stderr.on("data", (d) => { err += d.toString(); });
+    proc.on("error", reject);
     proc.on("close", (code) => {
-      if (code !== 0) reject(new Error(err || `claude exited ${code}`));
+      if (code !== 0) reject(new Error((err || out || `claude exited ${code}`).trim()));
       else resolve(out.trim());
     });
+
+    proc.stdin.write(prompt);
+    proc.stdin.end();
   });
 }
 
 export async function POST(req: NextRequest) {
-  const { sport, hookVibe, legs, reviseNote, previousScript } = await req.json();
+  try {
+    const { pickDump, hookVibe, reviseNote, previousScript } = await req.json();
 
-  const userMsg = previousScript
-    ? `Previous script:\n${previousScript}\n\nRevise based on this note: ${reviseNote}`
-    : `Sport/event: ${sport}
-Hook vibe: ${hookVibe}
-Legs:
-${legs.map((l: { player: string; stat: string; line: string; recentForm: string; matchupEdge?: string }, i: number) =>
-  `${i + 1}. Player: ${l.player} | Stat: ${l.stat} | Line: ${l.line} | Recent form: ${l.recentForm}${l.matchupEdge ? ` | Matchup edge: ${l.matchupEdge}` : ""}`
-).join("\n")}`;
+    const userMsg = previousScript
+      ? `Here is the current script:\n${previousScript}\n\nOriginal notes:\n${pickDump || "No original notes provided."}\n\nRevise it based on this chat note:\n${reviseNote}`
+      : `Hook direction: ${hookVibe}\n\nMessy pick notes from user:\n${pickDump}`;
 
-  const fullPrompt = `${SYSTEM}\n\n${userMsg}`;
-  const script = await runClaude(fullPrompt);
-  return NextResponse.json({ script });
+    const script = await runClaude(`${SYSTEM}\n\n${userMsg}`);
+    return NextResponse.json({ script });
+  } catch (err) {
+    const message = err instanceof Error ? err.message : "Script generation failed";
+    return NextResponse.json({ error: message }, { status: 500 });
+  }
 }
