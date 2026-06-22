@@ -1,25 +1,35 @@
 # Hanoi Picks — Message Operator Bot Plan
 
+## Scope (locked)
+
+**This is the ONLY bot we are building right now.** The Front Desk (the bot that
+answers members) is DEFERRED — we don't yet know what members will ask, so we are
+not building it. All focus is the Message Operator.
+
 ## What this bot is
 
-The Message Operator is the bot for official server posts.
+The Message Operator is the bot for official server posts. It writes and posts the
+official messages into specific channels: announcements, member announcements,
+join premium, free premium, premium wins, giveaways, social, and contact-us.
 
-It is different from the Front Desk:
+## Core decision (locked)
 
-- **Front Desk** answers members.
-- **Message Operator** writes and posts official messages into specific channels.
-
-This is the bot Drew is asking for when he says: announcements, member announcements, join premium, free premium, premium wins, giveaways, and other channel-specific server messages.
-
-## Core decision
-
-Build this as a MiniMax-powered bot with channel-specific templates and approval buttons.
-
-The bot should not randomly post on its own. It drafts first, then an approved owner/admin posts it.
+- **Engine: MiniMax M3 agent.** Not Claude.
+- **Home: the `agent-control` channel.** That is the single place the owner goes
+  to command it — "make an announcement", "do a member announcement",
+  "post the join-premium offer", etc. The owner talks to it there; it posts the
+  finished message into the correct target channel.
+- **Templates: one instruction file per message type.** Each type (announcement,
+  member-announcement, join-premium, free-premium, premium-wins, giveaway,
+  social, contact-us) gets its own template file telling the bot how to write
+  that kind of post. The owner just says what they want; the bot pulls the
+  matching template and fills it in.
+- **Draft-first, never auto-post.** It drafts, shows the target channel, and
+  waits for the owner's approval before anything goes live.
 
 ## Owner flow
 
-1. Owner opens the bot control channel.
+1. Owner opens the `agent-control` channel.
 2. Owner says what they want, for example:
    - “Make a Premium announcement for tonight.”
    - “Post a free Premium promo.”
