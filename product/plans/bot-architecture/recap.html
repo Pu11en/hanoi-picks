@@ -1,0 +1,279 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Hanoi Picks — Bot Plan Recap</title>
+<style>
+  :root{
+    --black-metal:#0B0C0E;
+    --cinder:#1C1E22;
+    --cinder-2:#23262b;
+    --chimney:#6A6E74;
+    --sea-lion:#8C8378;
+    --blue:#7C97AB;
+    --blue-soft:rgba(124,151,171,.14);
+    --gold:#caa35a;
+    --green:#5d8a6a;
+    --red:#a05a5a;
+    --text:#D7DBDF;
+    --text-dim:#9aa0a6;
+  }
+  *{box-sizing:border-box;margin:0;padding:0}
+  body{
+    background:radial-gradient(1200px 700px at 70% -10%, #15181c 0%, var(--black-metal) 55%);
+    color:var(--text);
+    font:16px/1.6 -apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,Helvetica,Arial,sans-serif;
+    -webkit-font-smoothing:antialiased;
+    padding:0 20px 120px;
+  }
+  .wrap{max-width:960px;margin:0 auto}
+  header{padding:64px 0 28px;text-align:center}
+  .kicker{letter-spacing:.32em;text-transform:uppercase;font-size:12px;color:var(--blue);margin-bottom:14px}
+  h1{font-size:40px;font-weight:600;letter-spacing:-.02em;margin-bottom:10px}
+  .sub{color:var(--text-dim);font-size:17px;max-width:580px;margin:0 auto}
+  .rule{height:1px;background:linear-gradient(90deg,transparent,var(--chimney),transparent);opacity:.4;margin:42px 0}
+  h2{font-size:13px;letter-spacing:.22em;text-transform:uppercase;color:var(--sea-lion);margin:0 0 22px;font-weight:600}
+  section{margin-top:58px}
+  .changes{display:flex;flex-direction:column;gap:14px}
+  .commit{
+    background:linear-gradient(180deg,var(--cinder) 0%,#15171b 100%);
+    border:1px solid #2a2e34;border-radius:14px;padding:22px 24px;position:relative;
+    display:grid;grid-template-columns:auto 1fr auto;gap:18px;align-items:center;
+  }
+  .commit .num{
+    width:38px;height:38px;border-radius:50%;background:var(--blue-soft);
+    color:var(--blue);display:flex;align-items:center;justify-content:center;
+    font-weight:600;font-size:14px;border:1px solid #33454f;
+  }
+  .commit h3{font-size:16px;font-weight:600;margin-bottom:3px}
+  .commit p{font-size:14px;color:var(--text-dim)}
+  .commit .hash{font-size:11px;color:var(--chimney);font-family:ui-monospace,Menlo,monospace}
+
+  /* before/after */
+  .compare{display:grid;grid-template-columns:1fr 1fr;gap:18px}
+  @media(max-width:760px){.compare{grid-template-columns:1fr}}
+  .panel{
+    background:linear-gradient(180deg,var(--cinder) 0%,#15171b 100%);
+    border:1px solid #2a2e34;border-radius:14px;padding:22px;position:relative;overflow:hidden;
+  }
+  .panel.old{opacity:.85}
+  .panel .tag{font-size:11px;letter-spacing:.2em;text-transform:uppercase;color:var(--text-dim);margin-bottom:8px}
+  .panel h3{font-size:18px;font-weight:600;margin-bottom:12px}
+  .panel .stripe{position:absolute;inset:0 0 auto 0;height:3px}
+  .panel.old .stripe{background:var(--chimney)}
+  .panel.new .stripe{background:var(--blue)}
+  .panel ul{list-style:none;display:flex;flex-direction:column;gap:9px}
+  .panel li{padding-left:18px;position:relative;font-size:14px}
+  .panel li::before{content:"";position:absolute;left:0;top:9px;width:6px;height:6px;border-radius:50%}
+  .panel.old li::before{background:var(--chimney);opacity:.7}
+  .panel.new li::before{background:var(--blue)}
+  .panel.old li{color:var(--text-dim)}
+  .panel.new li{color:var(--text)}
+  .badge{display:inline-block;font-size:11px;padding:2px 8px;border-radius:999px;letter-spacing:.04em}
+  .b-removed{background:rgba(160,90,90,.16);color:#c98282;border:1px solid #5a3434}
+  .b-added{background:rgba(124,151,171,.14);color:var(--blue);border:1px solid #33454f}
+  .b-kept{background:rgba(140,131,120,.12);color:var(--sea-lion);border:1px solid #3a372f}
+
+  /* file map */
+  .files{display:flex;flex-direction:column;gap:6px}
+  .file{display:grid;grid-template-columns:auto 1fr auto;gap:14px;align-items:center;padding:12px 16px;background:var(--cinder);border:1px solid #2a2e34;border-radius:10px}
+  .file .icon{width:24px;height:24px;border-radius:6px;background:var(--blue-soft);color:var(--blue);display:flex;align-items:center;justify-content:center;font-size:11px;font-weight:600;border:1px solid #33454f}
+  .file code{font-family:ui-monospace,Menlo,monospace;font-size:13px;color:var(--text)}
+  .file .stat{font-size:12px;color:var(--text-dim)}
+
+  /* quote panel */
+  .quote{
+    background:var(--cinder);border:1px solid #2a2e34;border-left:3px solid var(--gold);
+    border-radius:10px;padding:18px 22px;margin-top:24px;font-size:14.5px;
+  }
+  .quote .who{font-size:11px;letter-spacing:.18em;text-transform:uppercase;color:var(--gold);margin-bottom:6px}
+  .quote p{color:var(--text);font-style:italic}
+
+  /* facts grid */
+  .facts{display:grid;grid-template-columns:repeat(3,1fr);gap:14px}
+  @media(max-width:760px){.facts{grid-template-columns:1fr}}
+  .fact{background:var(--cinder);border:1px solid #2a2e34;border-radius:12px;padding:18px;text-align:center}
+  .fact .num{font-size:28px;font-weight:600;color:var(--blue);letter-spacing:-.02em}
+  .fact .lbl{font-size:12px;color:var(--text-dim);text-transform:uppercase;letter-spacing:.16em;margin-top:4px}
+
+  /* ask banner */
+  .ask{
+    background:linear-gradient(180deg,var(--cinder) 0%,#15171b 100%);
+    border:1px solid #33454f;border-radius:16px;padding:26px;position:relative;overflow:hidden;
+  }
+  .ask::before{content:"";position:absolute;inset:0 0 auto 0;height:3px;background:var(--blue)}
+  .ask h3{font-size:18px;margin-bottom:6px}
+  .ask p{font-size:14.5px;color:var(--text-dim)}
+  .ask .pill{display:inline-block;margin-top:14px;background:var(--blue-soft);border:1px solid #33454f;color:var(--blue);padding:5px 12px;border-radius:999px;font-size:13px}
+
+  footer{text-align:center;margin-top:70px;color:var(--chimney);font-size:12px;letter-spacing:.05em}
+</style>
+</head>
+<body>
+<div class="wrap">
+
+  <header>
+    <div class="kicker">Recap · Bot Plan · Last 4 Changes</div>
+    <h1>Where The Plan Is Now</h1>
+    <p class="sub">From a public repo to a sales-forward bot brain, built off the live Discord copy.</p>
+  </header>
+
+  <div class="rule"></div>
+
+  <!-- QUICK STATS -->
+  <section style="margin-top:0">
+    <h2>By The Numbers</h2>
+    <div class="facts">
+      <div class="fact"><div class="num">4</div><div class="lbl">Commits Pushed</div></div>
+      <div class="fact"><div class="num">3</div><div class="lbl">Plan Files</div></div>
+      <div class="fact"><div class="num">2</div><div class="lbl">Bots Designed</div></div>
+    </div>
+  </section>
+
+  <!-- COMMIT TIMELINE -->
+  <section>
+    <h2>What Got Shipped, In Order</h2>
+    <div class="changes">
+
+      <div class="commit">
+        <div class="num">1</div>
+        <div>
+          <h3>First Checkpoint + Public GitHub Repo</h3>
+          <p>Saved the project for the first time, removed private keys from the save, and put it on GitHub so the owner's iMessage AI can reach it.</p>
+        </div>
+        <div class="hash">ab6c0aa</div>
+      </div>
+
+      <div class="commit">
+        <div class="num">2</div>
+        <div>
+          <h3>Cleaned The Project</h3>
+          <p>Dropped the duplicate bot copy and the business folder. Now: brand, marketing, product. One bot = source of truth.</p>
+        </div>
+        <div class="hash">3ff7269</div>
+      </div>
+
+      <div class="commit">
+        <div class="num">3</div>
+        <div>
+          <h3>Bot Plan &amp; Config Created</h3>
+          <p>Drew up the two-bot setup (Front Desk + Megaphone), the channel map, and the first calm-voice rules. Visual + written plan on GitHub.</p>
+        </div>
+        <div class="hash">00fd17c + 3498dd9</div>
+      </div>
+
+      <div class="commit">
+        <div class="num">4</div>
+        <div>
+          <h3>Voice Fixed — Live Discord Copy Wins</h3>
+          <p>Pulled the calm voice out, replaced it with the real sales copy you pasted from the server. New pricing ($12/$30/$300) and the HANOI partner promo are now the truth.</p>
+        </div>
+        <div class="hash">280229e</div>
+      </div>
+
+    </div>
+  </section>
+
+  <!-- BEFORE/AFTER VOICE -->
+  <section>
+    <h2>The Big Pivot — Voice</h2>
+    <div class="compare">
+
+      <div class="panel old">
+        <div class="stripe"></div>
+        <div class="tag"><span class="badge b-removed">REPLACED</span> Old Voice</div>
+        <h3>Calm Water</h3>
+        <ul>
+          <li>Short, calm, no emojis.</li>
+          <li>"No hype" was a hard rule.</li>
+          <li>Premium push = gentle nudge.</li>
+          <li>Tone felt like a luxury brand.</li>
+          <li>No mention of "value picks" or "bankroll."</li>
+        </ul>
+      </div>
+
+      <div class="panel new">
+        <div class="stripe"></div>
+        <div class="tag"><span class="badge b-added">NEW</span> Current Voice</div>
+        <h3>Live Server Sales Copy</h3>
+        <ul>
+          <li>Direct, sales-forward, confident.</li>
+          <li>Emojis OK when they help people scan.</li>
+          <li>Premium push = active selling.</li>
+          <li>Sounds like a sportsbook, not a meditation app.</li>
+          <li>Uses "daily slips," "value picks," "pro edge," "bankroll."</li>
+        </ul>
+      </div>
+
+    </div>
+
+    <div class="quote">
+      <div class="who">Live server copy (the source of truth)</div>
+      <p>🌟 Start winning with Hanoi's Picks. 8+ daily props with full data writeups across every major sport. Pro edge: locked-in team of experts and proprietary AI scanners finding value and discrepancies 24/7. No risk: scale your bankroll today and cancel anytime.</p>
+    </div>
+  </section>
+
+  <!-- WHAT THE FRONT DESK NOW KNOWS -->
+  <section>
+    <h2>What The Front Desk Knows Now</h2>
+    <div class="compare">
+
+      <div class="panel new">
+        <div class="stripe"></div>
+        <div class="tag"><span class="badge b-kept">Core Facts</span> The Brain</div>
+        <ul>
+          <li>8+ daily plays with full data writeups.</li>
+          <li>Sports: football, basketball, baseball, soccer, hockey, esports, tennis, EV+, MMA/boxing.</li>
+          <li>Pricing: $12 weekly · $30 monthly · $300 lifetime.</li>
+          <li>Free Premium via 4 partner books with code <b>HANOI</b>.</li>
+          <li>Socials: Instagram, TikTok, YouTube — all @hanoipicks.</li>
+        </ul>
+      </div>
+
+      <div class="panel new">
+        <div class="stripe"></div>
+        <div class="tag"><span class="badge b-kept">Hard Lines</span> Bot Must Not</div>
+        <ul>
+          <li>Invent picks, records, or prices.</li>
+          <li>Leak Premium picks.</li>
+          <li>Claim access is active before proof is checked.</li>
+          <li>Give private/admin info.</li>
+          <li>Bypass payment or sportsbook proof steps.</li>
+          <li>Hand sensitive questions to the owner.</li>
+        </ul>
+      </div>
+
+    </div>
+  </section>
+
+  <!-- FILE MAP -->
+  <section>
+    <h2>Files Added / Changed</h2>
+    <div class="files">
+      <div class="file"><div class="icon">+</div><code>product/plans/bot-architecture/plan.html</code><div class="stat">visual plan, dark-theme</div></div>
+      <div class="file"><div class="icon">+</div><code>product/plans/bot-architecture/BOT-CONFIG-PLAN.md</code><div class="stat">2-bots + channel map</div></div>
+      <div class="file"><div class="icon">+</div><code>product/plans/bot-architecture/FRONT-DESK-BRAIN.md</code><div class="stat">facts, voice, samples</div></div>
+      <div class="file"><div class="icon">+</div><code>product/plans/bot-architecture/recap.html</code><div class="stat">this page</div></div>
+      <div class="file"><div class="icon">~</div><code>brand/BRAND-LANGUAGE.md</code><div class="stat">voice + bot rules</div></div>
+      <div class="file"><div class="icon">~</div><code>AGENTS.md</code><div class="stat">MiniMax-first</div></div>
+      <div class="file"><div class="icon">−</div><code>hanoi-picks-discord/*</code><div class="stat">duplicate removed</div></div>
+      <div class="file"><div class="icon">−</div><code>business/*</code><div class="stat">folder dropped</div></div>
+    </div>
+  </section>
+
+  <!-- OPEN -->
+  <section>
+    <h2>Next, If You Want It</h2>
+    <div class="ask">
+      <h3>Build the first Front Desk answers</h3>
+      <p>Pick 5–8 real questions your members actually ask, write the calm-and-direct answers in the new voice, and we drop them into the bot's brain as the v1 reply set.</p>
+      <span class="pill">Recommended next step</span>
+    </div>
+  </section>
+
+  <footer>4 commits · all pushed · all tests green · Hanoi Picks</footer>
+
+</div>
+</body>
+</html>
