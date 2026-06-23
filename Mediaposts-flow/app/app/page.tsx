@@ -21,9 +21,18 @@ const DEMO_SCRIPT = "Betting MLB strikeouts have been so free this year. Startin
 type VoiceOption = { voiceId: string; name: string; previewUrl?: string };
 
 export default function Home() {
-  const [pickDump, setPickDump] = useState("");
-  const [hookVibe, setHookVibe] = useState(HOOK_VIBES[0]);
-  const [script, setScript] = useState("");
+  const [pickDump, setPickDump] = useState(() => {
+    if (typeof window === "undefined") return "";
+    return localStorage.getItem("hp_pickDump") ?? "";
+  });
+  const [hookVibe, setHookVibe] = useState(() => {
+    if (typeof window === "undefined") return HOOK_VIBES[0];
+    return localStorage.getItem("hp_hookVibe") ?? HOOK_VIBES[0];
+  });
+  const [script, setScript] = useState(() => {
+    if (typeof window === "undefined") return "";
+    return localStorage.getItem("hp_script") ?? "";
+  });
   const [reviseNote, setReviseNote] = useState("");
   const [voiceUrl, setVoiceUrl] = useState("");
   const [voiceMode, setVoiceMode] = useState<"elevenlabs" | "upload">("elevenlabs");
@@ -31,11 +40,20 @@ export default function Home() {
   const [selectedVoiceId, setSelectedVoiceId] = useState("");
   const [customVoiceId, setCustomVoiceId] = useState("");
   const [voicesLoading, setVoicesLoading] = useState(false);
-  const [step, setStep] = useState<"dump" | "script" | "voice">("dump");
+  const [step, setStep] = useState<"dump" | "script" | "voice">(() => {
+    if (typeof window === "undefined") return "dump";
+    const saved = localStorage.getItem("hp_step");
+    return (saved as "dump" | "script" | "voice") ?? "dump";
+  });
   const [loading, setLoading] = useState(false);
   const [voiceLoading, setVoiceLoading] = useState(false);
   const [error, setError] = useState("");
   const fileRef = useRef<HTMLInputElement>(null);
+
+  useEffect(() => { localStorage.setItem("hp_pickDump", pickDump); }, [pickDump]);
+  useEffect(() => { localStorage.setItem("hp_hookVibe", hookVibe); }, [hookVibe]);
+  useEffect(() => { localStorage.setItem("hp_script", script); }, [script]);
+  useEffect(() => { localStorage.setItem("hp_step", step); }, [step]);
 
   function loadDemo() {
     setPickDump(DEMO_NOTES);
@@ -43,6 +61,12 @@ export default function Home() {
     setScript(DEMO_SCRIPT);
     setError("");
     setStep("script");
+  }
+
+  function clearDraft() {
+    setPickDump(""); setScript(""); setReviseNote(""); setVoiceUrl("");
+    setStep("dump"); setError("");
+    ["hp_pickDump","hp_hookVibe","hp_script","hp_step"].forEach(k => localStorage.removeItem(k));
   }
 
   async function loadVoices() {
@@ -135,6 +159,9 @@ export default function Home() {
         <div style={{ display: "flex", gap: 8, alignItems: "center" }}>
           <button className="btn-ghost" style={{ padding: "6px 14px", fontSize: 12, marginRight: 4 }} onClick={loadDemo}>
             ⚡ Demo
+          </button>
+          <button className="btn-ghost" style={{ padding: "6px 14px", fontSize: 12, marginRight: 4 }} onClick={clearDraft}>
+            Clear
           </button>
           {["dump", "script", "voice"].map((s, i) => (
             <span key={s} style={{
