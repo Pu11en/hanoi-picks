@@ -18,7 +18,9 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
           <span style={{ fontWeight: 800, fontSize: 16, color: "var(--accent)", letterSpacing: "-0.02em" }}>
             HANOI PICKS
           </span>
-          <span style={{ color: "var(--muted)", fontSize: 13 }}>Mediaposts Flow</span>
+          <a href="/" style={{ color: "var(--muted)", fontSize: 13, textDecoration: "none" }}>Queue</a>
+          <a href="/make-video" style={{ color: "var(--muted)", fontSize: 13, textDecoration: "none" }}>Make Video</a>
+          <a href="/clips" style={{ color: "var(--muted)", fontSize: 13, textDecoration: "none" }}>Clips</a>
         </nav>
         {children}
         <div style={{ height: 60 }} />
