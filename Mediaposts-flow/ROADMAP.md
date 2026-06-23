@@ -25,8 +25,9 @@ truth that drives clip search and caption timing.
 
 ## PHASE 2 — Clip scraping (next)
 - AI brain = the **pi coding agent** (this agent), NOT Claude Code.
-  - Reason: pi has the Copilot auto-router (spreads load across subscriptions) and strong research/GitHub
-    tools (octocode, brave-search) for finding footage.
+  - Reason: pi has the Copilot auto-router (routes across models inside the GitHub Copilot subscription
+    only — NOT Drew's other subscriptions) and strong research/GitHub tools (octocode, brave-search)
+    for finding footage.
   - Architecture: the app's API route shells out to the pi agent the same way it currently shells out to
     `claude -p`. The pi agent gets the transcript + player list and runs the search/download.
 - Sources: YouTube + YouTube Shorts first (vertical preferred); TikTok and other sources added after.
