@@ -1,0 +1,17 @@
+*.png
+*.jpg
+*.jpeg
+*.webp
+__pycache__/
+*.pyc
+.env
+.omc/
+
+# Auto-generated template registry
+.registry.json
+
+# Allow sample images in templates (override global image ignore)
+!references/templates/**/samples/*.jpg
+!references/templates/**/samples/*.png
+# Allow generated GitHub/README visual assets
+!docs/assets/github/*.png
