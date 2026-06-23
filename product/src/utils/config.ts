@@ -17,6 +17,13 @@ const envSchema = z.object({
   // The channel the agent listens in. On startup it auto-binds this channel
   // to AGENT_WORKSPACE_DIR so the owner can just talk — no /register needed.
   AGENT_CONTROL_CHANNEL: z.string().default("agent-control"),
+  // Channel ID for picks intake — any message here is queued to the Make Video app, no Claude session.
+  PICKS_INTAKE_CHANNEL_ID: z
+    .string()
+    .optional()
+    .transform((v) => (v && v.length > 0 ? v : undefined)),
+  // URL of the local Make Video app queue endpoint
+  MAKE_VIDEO_QUEUE_URL: z.string().default("http://127.0.0.1:4000/api/queue"),
   AGENT_WORKSPACE_DIR: z
     .string()
     .optional()

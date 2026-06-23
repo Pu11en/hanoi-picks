@@ -7,6 +7,7 @@ import path from "node:path";
 import { pipeline } from "node:stream/promises";
 import { Readable } from "node:stream";
 import { L } from "../../utils/i18n.js";
+import { getConfig } from "../../utils/config.js";
 
 const IMAGE_EXTENSIONS = new Set([".png", ".jpg", ".jpeg", ".gif", ".webp"]);
 
@@ -64,7 +65,36 @@ export async function handleMessage(message: Message): Promise<void> {
   // Ignore bots and DMs
   if (message.author.bot || !message.guild) return;
 
-  // Check if channel is registered
+  // --- Picks intake channel: auto-queue to Make Video app, no Claude session ---
+  const { PICKS_INTAKE_CHANNEL_ID, MAKE_VIDEO_QUEUE_URL } = getConfig();
+  if (PICKS_INTAKE_CHANNEL_ID && message.channelId === PICKS_INTAKE_CHANNEL_ID) {
+    if (!isAllowedUser(message.author.id)) {
+      await message.reply("You are not authorized to post picks.");
+      return;
+    }
+    try {
+      const res = await fetch(MAKE_VIDEO_QUEUE_URL, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          pick: message.content.trim(),
+          author: message.author.username,
+          attachments: message.attachments.map((a) => ({ name: a.name, url: a.url })),
+          discordMessageId: message.id,
+          queuedAt: new Date().toISOString(),
+        }),
+      });
+      const { jobId } = await res.json() as { jobId: string };
+      await message.react("✅");
+      await message.reply(`✅ Queued as pick **#${jobId}** — open Make Video to process it.`);
+    } catch (e) {
+      console.error("[picks-intake] failed to queue:", e);
+      await message.reply("⚠️ Could not reach the Make Video app — is it running on localhost:4000?");
+    }
+    return;
+  }
+  // --- end picks intake ---
+
   const project = getProject(message.channelId);
   if (!project) return;
 
