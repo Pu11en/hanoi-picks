@@ -36,16 +36,16 @@ Mood reference (from the client): a temple on a still lake, fog, a boat, the eye
 
 ## 3. Colors (LOCKED palette)
 
-Muted, foggy, dark. Black + greys do the work. **One soft blue is the only real color.**
-NOTE: pull exact codes off the client's Pinterest swatch — values below are close estimates, confirm before final.
+Muted, foggy, dark. Black + greys do the work. **One soft blue-grey is the only real color.**
+Exact codes pulled from the saved Creative Canvas palette image (`Image 021`).
 
-| Name        | What it is                  | Approx | Use                          |
-|-------------|-----------------------------|--------|------------------------------|
-| Black Metal | near-black                  | `#0B0C0E` | background / base         |
-| Cinder      | dark charcoal               | `#1C1E22` | panels, depth             |
-| Chimney     | mid smoke grey              | `#6A6E74` | strokes, secondary text   |
-| Sea Lion    | warm muted taupe-grey       | `#8C8378` | soft warm tone, dividers  |
-| Blue Dolphin| soft slate blue (the accent)| `#7C97AB` | THE pop — logo accent, highlights |
+| Name        | What it is                    | Hex | Use                          |
+|-------------|-------------------------------|-----|------------------------------|
+| Black Metal | near-black anchor             | `#050505` | background / base         |
+| Cinder      | primary dark charcoal         | `#24292E` | panels, depth             |
+| Chimney     | secondary charcoal            | `#4A5156` | strokes, secondary text   |
+| Sea Lion    | mid slate grey                | `#808A92` | soft tone, dividers       |
+| Blue Dolphin| pale blue-grey highlight      | `#BDC7CE` | THE pop — logo accent, highlights |
 
 **Rule:** black + greys are the brand; Blue Dolphin is the single accent. Never add random colors. The *ratio* of these can flex while exploring — the set itself does not.
 
