@@ -1,156 +1,93 @@
-# VIDEO EDITOR PLAN — Hyperframes + Agent
+# VIDEO EDITOR PLAN — clone-and-strip, two agents
 
 ## What this builds
-A "Make Video" screen inside the existing Next.js app where Drew:
-1. Approves vertical clips for each player
-2. Gets a polished first-draft video auto-composed by the agent
-3. Refines it by talking to the agent inside an editor
-4. Hits render → downloads the MP4
-5. Every good video teaches the system → builds toward full automation
+A "Make Video" flow for Hanoi (and the other brands) that turns the locked voiceover into a post-ready 9:16 video. **We do not build a video editor from scratch** — we install proven open-source agent skills and adapt them.
 
-Engine: **Hyperframes only** (agent skills + Studio editor + renders via ffmpeg/Puppeteer)
-Input always starts from: `test-fixtures/locked-voice.mp3` + `locked-voice.json` + `locked-transcript.txt`
+## The two agents (kept separate on purpose)
+1. **Canvas / image agent** — turns pasted inspiration into branded overlays + cutout graphics.
+   - Engine: **Gemini Nano Banana Pro** (`gemini-3-pro-image-preview`, best) / **Nano Banana 2** (`gemini-3.1-flash-image`, fast). The canvas already uses `@google/genai`.
+   - Skills to strip: **`smixs/visual-skills`** (current Gemini 3 Pro/Flash prompting) + **`bananahub-ai/bananahub-skill`** (Google's official image best-practices). Prompt library: **`YouMind-OpenLab/awesome-nano-banana-pro-prompts`**.
+   - Cutouts (transparent PNG, "just the element"): **`rembg`** — local, free, one command. No Gemini needed.
+2. **Video agent** — assembles the actual MP4.
+   - Brain to strip: **`browser-use/video-use`** — chat-driven video editor. Drop clips in a folder, talk, get `final.mp4`. Already cuts, color-grades, burns captions, self-checks output, and uses **Hyperframes** for overlays.
+   - Craft skills to add: **`iart-ai/tiktok-video-skills`** — `short-form-video`, `caption-animation` (kinetic captions), `lower-thirds` (leg/odds graphics), `countdown-video` (hype).
 
----
-
-## The 5 phases (build in this order)
-
----
-
-### Phase 1 — Clip Discovery + Timeline Mapping
-**Goal:** Find enough native 9:16 footage for every moment of the script. The visual ALWAYS shows the subject being talked about — no filler, no generic b-roll, ever.
-
-**Step A — Map the script to a timeline (the key step):**
-- Read `locked-voice.json` (word-by-word timestamps)
-- Find when each subject (player OR team) is spoken → build a time segment for it
-  - e.g. Ronaldo = 0:00–0:11, Waterman = 0:11–0:21, Kane = 0:21–0:30
-- A subject mentioned more than once gets footage in EVERY spot it's mentioned
-- **Hook rule:** order the script/legs so the biggest name leads — the opening seconds are the visual hook that makes the clip perform
-- This segment map drives everything: each subject owns its slice of the timeline
-
-**Step B — Find enough footage to fill each slot:**
-- For each subject: search YouTube Shorts first, TikTok second via yt-dlp
-  - Player: `yt-dlp "ytsearch8:Ronaldo soccer shorts" --match-filter "height>=1080 & width<height"`
-  - Team: search the team name OR its star players
-  - TikTok fallback: `yt-dlp "https://www.tiktok.com/search?q=Ronaldo+soccer"`
-- **Pull enough clip seconds to cover that subject's whole segment.** If a slot is 11s, grab enough clips to fill 11s with no gap.
-- Show thumbnail previews per subject; Drew approves the look. If clips are junk, agent scrapes more on command.
-- Approved clips download to `app/public/clips/`. **All clip audio muted** — only the voiceover plays.
-- **Rules:** Never download a horizontal clip. Never leave a slot unfilled. If nothing vertical found → flag it, ask Drew to pick manually.
-
-**Already scaffolded:** `/api/search-clips`, `/api/download-clip`, Step 4 UI — needs real testing/tuning with the vertical filter.
+## Why clone-and-strip
+`video-use` + the iart motion skills + the Gemini image skills already encode the craft (timing, safe areas, frame-accurate render, on-brand type). Installing them makes the agent a professional editor on day one. We adapt, we don't reinvent.
 
 ---
 
-### Phase 2 — Hyperframes First Draft (agent composes)
-**Goal:** Agent auto-lays a first-draft composition using approved clips + voiceover + captions.
-
-Setup:
-```bash
-npx skills add heygen-com/hyperframes   # installs agent skills
-npx hyperframes init video-output        # scaffolds the composition project
-```
-
-Agent reads:
-- Approved clip paths (from Phase 1)
-- `locked-voice.mp3` → audio track, drives total duration
-- `locked-voice.json` → word-by-word timings for caption sync
-- `recipe.json` (if exists from a previous video — see Phase 5)
-
-Agent writes `video-output/index.html`:
-- **Clips placed by the Phase 1 segment map** — each subject's clips sit exactly in their time slot, so the visual matches the voiceover word-for-word (Ronaldo on screen while "Ronaldo" is spoken, cut to the next leg when the script switches)
-- Biggest name leads = the hook
-- Each slot filled completely — no gaps, no clip running out mid-sentence
-- All clip audio muted; `locked-voice.mp3` on the audio track, full duration, drives total length
-- Word-synced captions built from `locked-voice.json` timings, styled for 9:16 in Hanoi Picks brand colors
-- Composition size: 1080×1920
-- Uses Hyperframes catalog blocks for captions + any transitions
-
-First draft will be rough — expected. That's what Phase 3 is for.
+## The pipeline (start → finish)
+1. **Locked fixture in** — `test-fixtures/locked-voice.mp3` + `locked-voice.json` (word timings) + transcript.
+2. **Timeline map** — read word timings → a segment per subject (player/team). Biggest name leads = hook. Repeated names get footage in every spot.
+3. **Find vertical clips** — yt-dlp searches YouTube Shorts first, TikTok second, native 9:16 only. Pull enough seconds to fill each segment. Drew approves thumbnails; agent scrapes more on command. All clip audio muted.
+4. **Brand overlays from the canvas** — the canvas (folded into the app, see below) holds pasted inspiration. Canvas agent makes branded overlays + cutouts (Gemini + rembg). These feed the video as graphics.
+5. **Assemble** — `video-use` lays clips into their slots under the voiceover, burns kinetic captions synced to `locked-voice.json`, drops lower-thirds (leg + odds), applies the brand recipe. Self-evals each cut.
+6. **Render + download** — `final.mp4`, 1080×1920, ready to post.
+7. **Per-brand recipe saved** — the approved look saved as that brand's template; next video for that brand starts in its style. (Tomo's point: brand-specific recipes so no babysitting across 8 brands.)
+8. **Music (later)** — trending audio under the voice, auto-balanced with ffmpeg `loudnorm`/ducking. Deferred to auto-posting.
 
 ---
 
-### Phase 3 — Editor + Agent Chat (refine together)
-**Goal:** Drew sits in the editor and talks to the agent to shape the video.
-
-**The core mechanism (how chat actually edits the video):**
-Drew types a message → the pi coding agent rewrites `video-output/index.html` using the Hyperframes skills → the preview re-renders. That loop IS the editor's engine. The agent runs on the GitHub Copilot auto-router (Copilot subscription models only) plus pi research tools.
-
-Two panels side by side:
-- **Left:** Hyperframes Studio (`@hyperframes/studio`) embedded or launched — live preview player + timeline. Drew can drag clip order, scrub, see captions.
-- **Right:** Chat panel — Drew types natural language, agent edits `index.html` live, preview refreshes.
-
-Example agent commands Drew can say:
-- "Make the Ronaldo clip longer"
-- "Move the caption to the bottom third"
-- "Add a flash transition between clips"
-- "The Kane clip feels slow, swap it for a different one"
-
-Agent uses the Hyperframes skills (already know the production loop) so plain language actually produces correct output — not guesswork.
+## The canvas, folded in
+`creative-canvas-local` already exists: tldraw board, paste/drop auto-named images, every image agent-aware, Gemini image gen/edit wired, local-only. **Its guts move into the Hanoi app** as a style panel — Drew pastes inspiration, the canvas agent makes overlays, the video agent uses them. No separate app, no image hosting needed (files read off disk).
 
 ---
 
-### Phase 4 — Render + Download
-**Goal:** One button → finished MP4.
-
-```bash
-npx hyperframes render   # outputs video-output/dist/output.mp4
-```
-
-- Wired to a `/api/render` route that calls `hyperframes render` as a child process
-- Progress streamed back to the UI
-- Download button appears when done
-- Output: `1080x1920` MP4, ready to post
+## Per-brand recipes (scaling to 8 brands)
+- Each brand = one recipe file: colors, caption style, overlay look, pacing.
+- Built once from that brand's canvas references, then reused.
+- Video agent loads the brand recipe and executes the style automatically — Drew approves, doesn't restyle.
 
 ---
 
-### Phase 5 — Recipe (the learning layer)
-**Goal:** Every video makes the next one better. Path to full automation.
-
-After Drew approves a render:
-- Save the final `index.html` as `recipes/recipe-YYYY-MM-DD.html`
-- Save a `recipe.json` summary: clip timing ratios, caption style, transitions used, total duration
-- Next video: agent loads the latest `recipe.json` as its starting template instead of building from scratch
-
-Over time:
-- Recipe captures Drew's taste (caption position, clip pacing, style)
-- Agent's first drafts get closer to done with every video
-- When recipe is stable enough → add a "Full Auto" button that runs Phases 1–4 with no approvals needed
-
-This is not machine learning. It's a growing template file. Simple, versioned, editable.
+## Build order (next session)
+1. **Install + smoke-test the skills** — `video-use`, `iart-ai/tiktok-video-skills`, `smixs/visual-skills`, `bananahub-skill`; install `rembg`. Confirm each runs.
+2. **Wire the clip finder** — vertical-only yt-dlp (Shorts→TikTok) driven by the timeline map; approval UI. (Existing `/api/search-clips` adapted.)
+3. **Fold the canvas into the app** — style panel: paste → Gemini overlay → rembg cutout → saved as brand asset.
+4. **Point `video-use` at the pipeline** — feed it approved clips + voiceover + word timings + brand overlays → `final.mp4`.
+5. **Brand recipe save/load** — capture the approved look per brand.
+6. **Make Video page** — one screen: timeline + clip approval + style panel + chat + preview + render.
 
 ---
 
-### Phase 6 — Background Music (later, for auto-posting)
-**Goal:** Add trending music under the voiceover, auto-balanced so it's pleasant.
+---
 
-- Scrape popular TikTok audio (or another trending-music source) → get the MP3
-- Lay it on a low-volume music track under the voiceover
-- **Auto-balance the levels:** voiceover stays clearly on top, music sits under it — never overbearing, never too quiet. Use ffmpeg loudness normalization (e.g. `loudnorm` / ducking) to hit a consistent good ratio every time.
-- Defer until auto-posting is being built; not needed for the manual editor.
+## The endgame: mass multi-platform auto-posting
+Once a brand's video renders, the same pipeline posts it across that brand's accounts — **8 brands × 3 platforms (YouTube, TikTok, Instagram)**. Drew has all logins. The client-brain AI (Tomo-style: knows each brand's voice/strategy) writes the caption/title/hashtags per platform, then publishes.
+
+**Brand × platform map (accounts exist for all of these):**
+
+| Brand | Handle | YouTube | TikTok | Instagram |
+|---|---|---|---|---|
+| Hanoi | hanoipicks | ✓ | ✓ | ✓ |
+| Yun | yun.plays | ✓ | ✓ | ✓ |
+| Tias | tias.locks | ✓ | ✓ | ✓ |
+| Mandem | mandem.plays | ✓ | ✓ | ✓ |
+| Halic | halicpicks | ✓ | ✓ | ✓ |
+| Evora | evoralocks | ✓ | ✓ | ✓ |
+| Doze | doze.picks | ✓ | ✓ | ✓ |
+| Dakar | dakarpicks | ✓ | ✓ | ✓ |
+
+**Credentials:** stored ONLY in `secrets/social-accounts.secret.json` — gitignored, chmod 600, never committed/pushed. The plan and repo never contain passwords.
+
+**Posting approach (decide at build time):** prefer official upload APIs / a proven scheduler over raw password automation, which gets accounts flagged/banned. Two candidates already in hand: **Blotato** (Drew pays for it; has an API made for multi-platform posting — the lazy win) and **`gitroomhq/postiz-app`** (open-source social scheduler, free backup). This is a later phase — captured here so the pipeline is built to feed it. Deferred until the single-brand (Hanoi) video flow is proven end to end.
 
 ---
 
-## Build order for next session
-
-1. **Fix clip search** — add vertical-only filter to existing `/api/search-clips`, test it actually returns Shorts/TikTok vertical clips
-2. **Install Hyperframes** — `npx skills add heygen-com/hyperframes`, init the composition project inside `Mediaposts-flow/`
-3. **Build `/api/compose`** — route that takes approved clip paths + fixtures → agent writes `index.html` first draft
-4. **Wire the editor page** — "Make Video" page with Studio embed on left, chat panel on right
-5. **Build `/api/render`** — calls `hyperframes render`, streams progress, returns download link
-6. **Add recipe save/load** — after first successful render, add the recipe layer
-
----
-
-## App facts (carry forward)
+## App facts
 - Next.js app: `Mediaposts-flow/app` — run: `setsid npm run dev -- --port 4000 </dev/null >/tmp/mediaposts.log 2>&1 & disown`
-- Tools installed: yt-dlp, ffmpeg, whisper (local, free)
-- Keys: `app/.env.local` (gitignored)
-- Checks before "done": `npx tsc --noEmit && npx eslint app/ && npm run build`
-- Commit: `lrc --skip --staged` then `git commit --no-verify`
-- Part 1 (script + voice) is FROZEN — never touch it
+- Installed local + free: yt-dlp, ffmpeg, whisper. To add: `rembg`, the four skill repos above.
+- Keys: `app/.env.local` (gitignored). `GEMINI_API_KEY` already used by the canvas. `video-use` wants `ELEVENLABS_API_KEY` (already set) for its transcribe step — but we already have word timings, so that step may be skippable.
+- The video AI runs on the GitHub Copilot auto-router (Copilot subscription models only).
+- Checks before "done": `npx tsc --noEmit && npx eslint app/ && npm run build`, then curl localhost:4000.
+- Commit: `lrc --skip --staged` then `git commit --no-verify`. Repo: Pu11en/hanoi-picks.
+- Part 1 (script + voice) is FROZEN — never touch it.
 
----
-
-## What "automated" looks like eventually
-Drew pastes pick notes → app extracts players → finds vertical clips → agent composes using recipe → renders → ready to post. Zero manual steps. The recipe is what gets us there, one video at a time.
+## Tools / repos referenced
+- `browser-use/video-use` — chat-driven video editor (the brain)
+- `iart-ai/tiktok-video-skills` — vertical short-form craft (captions, lower-thirds, countdown)
+- `smixs/visual-skills` + `bananahub-ai/bananahub-skill` — Gemini Nano Banana Pro/2 image skills
+- `YouMind-OpenLab/awesome-nano-banana-pro-prompts` — overlay style prompt library
+- `rembg` — transparent-background cutouts
+- `heygen-com/hyperframes` — overlay render engine (used by video-use)
